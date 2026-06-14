@@ -31,7 +31,9 @@ router.post("/promotions", async (req, res): Promise<void> => {
     res.status(400).json({ error: parsed.error.message });
     return;
   }
-  const [row] = await db.insert(promotionsTable).values(parsed.data).returning();
+  const result = await db.insert(promotionsTable).values(parsed.data);
+  const insertedId = (result as any).insertId ?? (result as any)[0]?.insertId;
+  const [row] = await db.select().from(promotionsTable).where(eq(promotionsTable.id, insertedId));
   res.status(201).json(
     ListPromotionsResponseItem.parse({
       ...row,

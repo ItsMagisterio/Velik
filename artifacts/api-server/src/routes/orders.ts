@@ -28,7 +28,7 @@ async function buildOrder(order: any) {
 }
 
 router.get("/orders", async (req, res): Promise<void> => {
-  const qp = ListOrdersQueryParams.safeParse(req.query);
+  const _qp = ListOrdersQueryParams.safeParse(req.query);
   const rows = await db
     .select()
     .from(ordersTable)
@@ -49,7 +49,9 @@ router.post("/orders", async (req, res): Promise<void> => {
   const { items, sessionId, ...orderData } = parsed.data;
   const total = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
 
-  const [order] = await db.insert(ordersTable).values({ ...orderData, total }).returning();
+  const result = await db.insert(ordersTable).values({ ...orderData, total });
+  const orderId = (result as any).insertId ?? (result as any)[0]?.insertId;
+  const [order] = await db.select().from(ordersTable).where(eq(ordersTable.id, orderId));
 
   await Promise.all(
     items.map(async (item) => {
@@ -99,11 +101,8 @@ router.patch("/orders/:id", async (req, res): Promise<void> => {
     res.status(400).json({ error: parsed.error.message });
     return;
   }
-  const [order] = await db
-    .update(ordersTable)
-    .set(parsed.data)
-    .where(eq(ordersTable.id, params.data.id))
-    .returning();
+  await db.update(ordersTable).set(parsed.data).where(eq(ordersTable.id, params.data.id));
+  const [order] = await db.select().from(ordersTable).where(eq(ordersTable.id, params.data.id));
   if (!order) {
     res.status(404).json({ error: "Order not found" });
     return;

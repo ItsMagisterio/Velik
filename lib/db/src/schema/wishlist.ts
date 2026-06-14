@@ -1,12 +1,12 @@
-import { pgTable, serial, integer, timestamp } from "drizzle-orm/pg-core";
+import { mysqlTable, serial, int, timestamp } from "drizzle-orm/mysql-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 
-export const wishlistTable = pgTable("wishlist", {
+export const wishlistTable = mysqlTable("wishlist", {
   id: serial("id").primaryKey(),
-  userId: integer("user_id").notNull(),
-  productId: integer("product_id").notNull(),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  userId: int("user_id").notNull(),
+  productId: int("product_id").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
 export const insertWishlistSchema = createInsertSchema(wishlistTable).omit({ id: true, createdAt: true });

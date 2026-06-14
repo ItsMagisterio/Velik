@@ -1,8 +1,8 @@
-import { pgTable, text, serial, real, timestamp } from "drizzle-orm/pg-core";
+import { mysqlTable, text, serial, float, timestamp } from "drizzle-orm/mysql-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 
-export const repairRequestsTable = pgTable("repair_requests", {
+export const repairRequestsTable = mysqlTable("repair_requests", {
   id: serial("id").primaryKey(),
   customerName: text("customer_name").notNull(),
   customerPhone: text("customer_phone").notNull(),
@@ -10,8 +10,8 @@ export const repairRequestsTable = pgTable("repair_requests", {
   bikeDescription: text("bike_description").notNull(),
   problemDescription: text("problem_description"),
   status: text("status").notNull().default("new"),
-  estimatedCost: real("estimated_cost"),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  estimatedCost: float("estimated_cost"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
 export const insertRepairRequestSchema = createInsertSchema(repairRequestsTable).omit({ id: true, createdAt: true });

@@ -63,21 +63,16 @@ router.post("/cart/items", async (req, res): Promise<void> => {
     .where(and(eq(cartItemsTable.sessionId, sessionId), eq(cartItemsTable.productId, parsed.data.productId)));
 
   if (existing) {
-    const [updated] = await db
-      .update(cartItemsTable)
-      .set({ quantity: existing.quantity + parsed.data.quantity })
-      .where(eq(cartItemsTable.id, existing.id))
-      .returning();
-    const [product] = await db.select().from(productsTable).where(eq(productsTable.id, updated.productId));
-    res.status(201).json({ id: updated.id, productId: updated.productId, quantity: updated.quantity, product: { ...product, categoryName: null } });
+    const newQty = existing.quantity + parsed.data.quantity;
+    await db.update(cartItemsTable).set({ quantity: newQty }).where(eq(cartItemsTable.id, existing.id));
+    const [product] = await db.select().from(productsTable).where(eq(productsTable.id, existing.productId));
+    res.status(201).json({ id: existing.id, productId: existing.productId, quantity: newQty, product: { ...product, categoryName: null } });
     return;
   }
 
-  const [item] = await db
-    .insert(cartItemsTable)
-    .values({ sessionId, productId: parsed.data.productId, quantity: parsed.data.quantity })
-    .returning();
-
+  const result = await db.insert(cartItemsTable).values({ sessionId, productId: parsed.data.productId, quantity: parsed.data.quantity });
+  const insertedId = (result as any).insertId ?? (result as any)[0]?.insertId;
+  const [item] = await db.select().from(cartItemsTable).where(eq(cartItemsTable.id, insertedId));
   const [product] = await db.select().from(productsTable).where(eq(productsTable.id, item.productId));
   res.status(201).json({ id: item.id, productId: item.productId, quantity: item.quantity, product: { ...product, categoryName: null } });
 });
@@ -93,11 +88,8 @@ router.patch("/cart/items/:itemId", async (req, res): Promise<void> => {
     res.status(400).json({ error: parsed.error.message });
     return;
   }
-  const [updated] = await db
-    .update(cartItemsTable)
-    .set({ quantity: parsed.data.quantity })
-    .where(eq(cartItemsTable.id, params.data.itemId))
-    .returning();
+  await db.update(cartItemsTable).set({ quantity: parsed.data.quantity }).where(eq(cartItemsTable.id, params.data.itemId));
+  const [updated] = await db.select().from(cartItemsTable).where(eq(cartItemsTable.id, params.data.itemId));
   if (!updated) {
     res.status(404).json({ error: "Cart item not found" });
     return;

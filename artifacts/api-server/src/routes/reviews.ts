@@ -37,10 +37,9 @@ router.post("/products/:productId/reviews", async (req, res): Promise<void> => {
     return;
   }
 
-  const [review] = await db
-    .insert(reviewsTable)
-    .values({ ...parsed.data, productId: params.data.productId })
-    .returning();
+  const result = await db.insert(reviewsTable).values({ ...parsed.data, productId: params.data.productId });
+  const insertedId = (result as any).insertId ?? (result as any)[0]?.insertId;
+  const [review] = await db.select().from(reviewsTable).where(eq(reviewsTable.id, insertedId));
 
   const allReviews = await db
     .select()

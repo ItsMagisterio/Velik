@@ -28,7 +28,9 @@ router.post("/repair-requests", async (req, res): Promise<void> => {
     res.status(400).json({ error: parsed.error.message });
     return;
   }
-  const [row] = await db.insert(repairRequestsTable).values(parsed.data).returning();
+  const result = await db.insert(repairRequestsTable).values(parsed.data);
+  const insertedId = (result as any).insertId ?? (result as any)[0]?.insertId;
+  const [row] = await db.select().from(repairRequestsTable).where(eq(repairRequestsTable.id, insertedId));
   res.status(201).json(
     ListRepairRequestsResponseItem.parse({ ...row, createdAt: row.createdAt.toISOString() }),
   );
@@ -45,11 +47,8 @@ router.patch("/repair-requests/:id", async (req, res): Promise<void> => {
     res.status(400).json({ error: parsed.error.message });
     return;
   }
-  const [row] = await db
-    .update(repairRequestsTable)
-    .set(parsed.data)
-    .where(eq(repairRequestsTable.id, params.data.id))
-    .returning();
+  await db.update(repairRequestsTable).set(parsed.data).where(eq(repairRequestsTable.id, params.data.id));
+  const [row] = await db.select().from(repairRequestsTable).where(eq(repairRequestsTable.id, params.data.id));
   if (!row) {
     res.status(404).json({ error: "Repair request not found" });
     return;

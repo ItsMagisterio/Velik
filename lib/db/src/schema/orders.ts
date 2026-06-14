@@ -1,11 +1,11 @@
-import { pgTable, text, serial, integer, real, jsonb, timestamp } from "drizzle-orm/pg-core";
+import { mysqlTable, text, serial, int, float, timestamp } from "drizzle-orm/mysql-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 
-export const ordersTable = pgTable("orders", {
+export const ordersTable = mysqlTable("orders", {
   id: serial("id").primaryKey(),
   status: text("status").notNull().default("pending"),
-  total: real("total").notNull(),
+  total: float("total").notNull(),
   customerName: text("customer_name").notNull(),
   customerPhone: text("customer_phone").notNull(),
   customerEmail: text("customer_email"),
@@ -13,15 +13,15 @@ export const ordersTable = pgTable("orders", {
   deliveryMethod: text("delivery_method").notNull().default("delivery"),
   paymentMethod: text("payment_method").notNull().default("cash"),
   comment: text("comment"),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
-export const orderItemsTable = pgTable("order_items", {
+export const orderItemsTable = mysqlTable("order_items", {
   id: serial("id").primaryKey(),
-  orderId: integer("order_id").notNull(),
-  productId: integer("product_id").notNull(),
-  quantity: integer("quantity").notNull(),
-  price: real("price").notNull(),
+  orderId: int("order_id").notNull(),
+  productId: int("product_id").notNull(),
+  quantity: int("quantity").notNull(),
+  price: float("price").notNull(),
   productName: text("product_name").notNull(),
   productImageUrl: text("product_image_url").notNull(),
 });

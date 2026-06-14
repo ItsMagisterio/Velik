@@ -57,16 +57,15 @@ router.post("/auth/register", async (req, res): Promise<void> => {
     return;
   }
 
-  const [user] = await db
-    .insert(usersTable)
-    .values({
-      email: parsed.data.email,
-      passwordHash: hashPassword(parsed.data.password),
-      name: parsed.data.name,
-      phone: parsed.data.phone ?? null,
-      role: "user",
-    })
-    .returning();
+  const result = await db.insert(usersTable).values({
+    email: parsed.data.email,
+    passwordHash: hashPassword(parsed.data.password),
+    name: parsed.data.name,
+    phone: parsed.data.phone ?? null,
+    role: "user",
+  });
+  const insertedId = (result as any).insertId ?? (result as any)[0]?.insertId;
+  const [user] = await db.select().from(usersTable).where(eq(usersTable.id, insertedId));
 
   const token = makeToken(user.id);
   res.status(201).json(
@@ -123,11 +122,8 @@ router.patch("/auth/me", async (req, res): Promise<void> => {
     res.status(400).json({ error: parsed.error.message });
     return;
   }
-  const [updated] = await db
-    .update(usersTable)
-    .set(parsed.data)
-    .where(eq(usersTable.id, user.id))
-    .returning();
+  await db.update(usersTable).set(parsed.data).where(eq(usersTable.id, user.id));
+  const [updated] = await db.select().from(usersTable).where(eq(usersTable.id, user.id));
   res.json(UpdateMeResponse.parse({ ...updated, createdAt: updated.createdAt.toISOString() }));
 });
 
@@ -158,10 +154,7 @@ router.post("/wishlist/:productId", async (req, res): Promise<void> => {
     res.status(401).json({ error: "Not authenticated" });
     return;
   }
-  await db
-    .insert(wishlistTable)
-    .values({ userId: user.id, productId: params.data.productId })
-    .onConflictDoNothing();
+  await db.insert(wishlistTable).values({ userId: user.id, productId: params.data.productId });
   res.sendStatus(204);
 });
 
@@ -176,9 +169,7 @@ router.delete("/wishlist/:productId", async (req, res): Promise<void> => {
     res.status(401).json({ error: "Not authenticated" });
     return;
   }
-  await db
-    .delete(wishlistTable)
-    .where(eq(wishlistTable.userId, user.id));
+  await db.delete(wishlistTable).where(eq(wishlistTable.userId, user.id));
   res.sendStatus(204);
 });
 

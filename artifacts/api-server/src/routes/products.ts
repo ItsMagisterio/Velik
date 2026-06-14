@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { eq, and, gte, lte, desc, asc, ilike, count, sql } from "drizzle-orm";
+import { eq, and, gte, lte, desc, asc, like, count, sql } from "drizzle-orm";
 import { db, productsTable, categoriesTable, reviewsTable } from "@workspace/db";
 import {
   ListProductsQueryParams,
@@ -21,6 +21,25 @@ import {
 
 const router: IRouter = Router();
 
+function parseJson<T>(val: unknown, fallback: T): T {
+  if (typeof val === "string") {
+    try {
+      return JSON.parse(val) as T;
+    } catch {
+      return fallback;
+    }
+  }
+  return (val ?? fallback) as T;
+}
+
+function parseProductRow<T extends { images: unknown; specs: unknown }>(r: T) {
+  return {
+    ...r,
+    images: parseJson<string[]>(r.images, []),
+    specs: parseJson<Record<string, string> | null>(r.specs, null),
+  };
+}
+
 router.get("/products/featured", async (_req, res): Promise<void> => {
   const rows = await db
     .select()
@@ -28,7 +47,7 @@ router.get("/products/featured", async (_req, res): Promise<void> => {
     .where(eq(productsTable.isFeatured, true))
     .orderBy(desc(productsTable.rating))
     .limit(8);
-  const withCategory = rows.map((r) => ({ ...r, categoryName: null }));
+  const withCategory = rows.map((r) => ({ ...parseProductRow(r), categoryName: null }));
   res.json(GetFeaturedProductsResponse.parse(withCategory));
 });
 
@@ -38,7 +57,7 @@ router.get("/products/popular", async (_req, res): Promise<void> => {
     .from(productsTable)
     .orderBy(desc(productsTable.reviewCount), desc(productsTable.rating))
     .limit(8);
-  const withCategory = rows.map((r) => ({ ...r, categoryName: null }));
+  const withCategory = rows.map((r) => ({ ...parseProductRow(r), categoryName: null }));
   res.json(GetPopularProductsResponse.parse(withCategory));
 });
 
@@ -49,7 +68,7 @@ router.get("/products/new-arrivals", async (_req, res): Promise<void> => {
     .where(eq(productsTable.isNew, true))
     .orderBy(desc(productsTable.createdAt))
     .limit(8);
-  const withCategory = rows.map((r) => ({ ...r, categoryName: null }));
+  const withCategory = rows.map((r) => ({ ...parseProductRow(r), categoryName: null }));
   res.json(GetNewArrivalsResponse.parse(withCategory));
 });
 
@@ -64,10 +83,10 @@ router.get("/products", async (req, res): Promise<void> => {
 
   const conditions = [];
   if (categoryId) conditions.push(eq(productsTable.categoryId, categoryId));
-  if (search) conditions.push(ilike(productsTable.name, `%${search}%`));
+  if (search) conditions.push(like(productsTable.name, `%${search}%`));
   if (minPrice != null) conditions.push(gte(productsTable.price, minPrice));
   if (maxPrice != null) conditions.push(lte(productsTable.price, maxPrice));
-  if (brand) conditions.push(ilike(productsTable.brand, `%${brand}%`));
+  if (brand) conditions.push(like(productsTable.brand, `%${brand}%`));
   if (inStock != null) conditions.push(eq(productsTable.inStock, inStock));
 
   const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
@@ -97,7 +116,7 @@ router.get("/products", async (req, res): Promise<void> => {
     db.select({ count: count() }).from(productsTable).where(whereClause),
   ]);
 
-  const withCategory = rows.map((r) => ({ ...r, categoryName: null }));
+  const withCategory = rows.map((r) => ({ ...parseProductRow(r), categoryName: null }));
 
   res.json(
     ListProductsResponse.parse({
@@ -115,8 +134,10 @@ router.post("/products", async (req, res): Promise<void> => {
     res.status(400).json({ error: parsed.error.message });
     return;
   }
-  const [row] = await db.insert(productsTable).values(parsed.data).returning();
-  res.status(201).json({ ...row, categoryName: null });
+  const result = await db.insert(productsTable).values(parsed.data);
+  const insertedId = (result as any).insertId ?? (result as any)[0]?.insertId;
+  const [row] = await db.select().from(productsTable).where(eq(productsTable.id, insertedId));
+  res.status(201).json({ ...parseProductRow(row), categoryName: null });
 });
 
 router.get("/products/:id", async (req, res): Promise<void> => {
@@ -140,9 +161,9 @@ router.get("/products/:id", async (req, res): Promise<void> => {
 
   res.json(
     GetProductResponse.parse({
-      ...row,
+      ...parseProductRow(row),
       categoryName: null,
-      relatedProducts: related.map((r) => ({ ...r, categoryName: null })),
+      relatedProducts: related.map((r) => ({ ...parseProductRow(r), categoryName: null })),
     }),
   );
 });
@@ -158,16 +179,13 @@ router.patch("/products/:id", async (req, res): Promise<void> => {
     res.status(400).json({ error: parsed.error.message });
     return;
   }
-  const [row] = await db
-    .update(productsTable)
-    .set(parsed.data)
-    .where(eq(productsTable.id, params.data.id))
-    .returning();
+  await db.update(productsTable).set(parsed.data).where(eq(productsTable.id, params.data.id));
+  const [row] = await db.select().from(productsTable).where(eq(productsTable.id, params.data.id));
   if (!row) {
     res.status(404).json({ error: "Product not found" });
     return;
   }
-  res.json(UpdateProductResponse.parse({ ...row, categoryName: null }));
+  res.json(UpdateProductResponse.parse({ ...parseProductRow(row), categoryName: null }));
 });
 
 router.delete("/products/:id", async (req, res): Promise<void> => {
@@ -196,7 +214,7 @@ router.get("/products/:id/related", async (req, res): Promise<void> => {
     .from(productsTable)
     .where(and(eq(productsTable.categoryId, product.categoryId), sql`${productsTable.id} != ${product.id}`))
     .limit(6);
-  res.json(GetRelatedProductsResponse.parse(rows.map((r) => ({ ...r, categoryName: null }))));
+  res.json(GetRelatedProductsResponse.parse(rows.map((r) => ({ ...parseProductRow(r), categoryName: null }))));
 });
 
 router.get("/stats/brands", async (_req, res): Promise<void> => {

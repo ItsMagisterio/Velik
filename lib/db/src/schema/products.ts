@@ -1,28 +1,28 @@
-import { pgTable, text, serial, integer, real, boolean, jsonb, timestamp } from "drizzle-orm/pg-core";
+import { mysqlTable, text, serial, int, float, boolean, json, timestamp } from "drizzle-orm/mysql-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 
-export const productsTable = pgTable("products", {
+export const productsTable = mysqlTable("products", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   slug: text("slug").notNull().unique(),
-  price: real("price").notNull(),
-  oldPrice: real("old_price"),
-  categoryId: integer("category_id").notNull(),
+  price: float("price").notNull(),
+  oldPrice: float("old_price"),
+  categoryId: int("category_id").notNull(),
   brand: text("brand").notNull(),
   inStock: boolean("in_stock").notNull().default(true),
-  stockCount: integer("stock_count").notNull().default(0),
+  stockCount: int("stock_count").notNull().default(0),
   imageUrl: text("image_url").notNull(),
-  images: text("images").array().notNull().default([]),
-  rating: real("rating").notNull().default(0),
-  reviewCount: integer("review_count").notNull().default(0),
+  images: json("images").$type<string[]>().notNull().default([]),
+  rating: float("rating").notNull().default(0),
+  reviewCount: int("review_count").notNull().default(0),
   badge: text("badge"),
   isFeatured: boolean("is_featured").notNull().default(false),
   isNew: boolean("is_new").notNull().default(false),
-  discountPercent: integer("discount_percent"),
+  discountPercent: int("discount_percent"),
   description: text("description"),
-  specs: jsonb("specs").$type<Record<string, string>>(),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  specs: json("specs").$type<Record<string, string>>(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
 export const insertProductSchema = createInsertSchema(productsTable).omit({ id: true, createdAt: true });

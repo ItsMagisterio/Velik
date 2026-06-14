@@ -25,7 +25,9 @@ router.post("/categories", async (req, res): Promise<void> => {
     res.status(400).json({ error: parsed.error.message });
     return;
   }
-  const [row] = await db.insert(categoriesTable).values(parsed.data).returning();
+  const result = await db.insert(categoriesTable).values(parsed.data);
+  const insertedId = (result as any).insertId ?? (result as any)[0]?.insertId;
+  const [row] = await db.select().from(categoriesTable).where(eq(categoriesTable.id, insertedId));
   res.status(201).json(GetCategoryResponse.parse(row));
 });
 
@@ -54,11 +56,8 @@ router.patch("/categories/:id", async (req, res): Promise<void> => {
     res.status(400).json({ error: parsed.error.message });
     return;
   }
-  const [row] = await db
-    .update(categoriesTable)
-    .set(parsed.data)
-    .where(eq(categoriesTable.id, params.data.id))
-    .returning();
+  await db.update(categoriesTable).set(parsed.data).where(eq(categoriesTable.id, params.data.id));
+  const [row] = await db.select().from(categoriesTable).where(eq(categoriesTable.id, params.data.id));
   if (!row) {
     res.status(404).json({ error: "Category not found" });
     return;
