@@ -127,3 +127,21 @@ CREATE TABLE IF NOT EXISTS `reviews` (
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `news` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `title` text NOT NULL,
+  `slug` varchar(255) NOT NULL,
+  `content` text NOT NULL,
+  `excerpt` text,
+  `image_url` text,
+  `is_published` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `news_slug_unique` (`slug`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Default admin user (password: adminadmin)
+INSERT INTO `users` (`email`, `password_hash`, `name`, `role`)
+VALUES ('admin', '9d97d4836e6bfc0caa5a1bdb5bd23f43cd5e9631e3074a2733dc3ceebc4aefb5', 'Администратор', 'admin')
+ON DUPLICATE KEY UPDATE `role` = 'admin';
