@@ -56,6 +56,7 @@ export function Layout({ children }: { children: ReactNode }) {
             <Link href="/catalog" className="text-sm font-medium text-foreground/80 hover:text-white transition-colors hover:text-glow-secondary">Каталог</Link>
             <Link href="/promotions" className="text-sm font-medium text-foreground/80 hover:text-white transition-colors hover:text-glow-secondary">Акции</Link>
             <Link href="/repair" className="text-sm font-medium text-foreground/80 hover:text-white transition-colors hover:text-glow-secondary">Ремонт</Link>
+            <Link href="/installment" className="text-sm font-medium text-foreground/80 hover:text-white transition-colors hover:text-glow-secondary">Рассрочка</Link>
             <Link href="/contacts" className="text-sm font-medium text-foreground/80 hover:text-white transition-colors hover:text-glow-secondary">Контакты</Link>
           </nav>
 
@@ -130,6 +131,9 @@ export function Layout({ children }: { children: ReactNode }) {
                 <Link href="/repair" className="text-2xl font-display font-medium text-white flex items-center justify-between border-b border-white/10 pb-4">
                   Ремонт
                 </Link>
+                <Link href="/installment" className="text-2xl font-display font-medium text-white flex items-center justify-between border-b border-white/10 pb-4">
+                  Рассрочка
+                </Link>
                 <Link href="/contacts" className="text-2xl font-display font-medium text-white flex items-center justify-between border-b border-white/10 pb-4">
                   Контакты
                 </Link>
@@ -185,7 +189,7 @@ export function Layout({ children }: { children: ReactNode }) {
               <ul className="space-y-4">
                 <li><Link href="/promotions" className="text-muted-foreground hover:text-primary transition-colors">Акции</Link></li>
                 <li><Link href="/repair" className="text-muted-foreground hover:text-primary transition-colors">Ремонт и сервис</Link></li>
-                <li><Link href="/delivery" className="text-muted-foreground hover:text-primary transition-colors">Доставка и оплата</Link></li>
+                <li><Link href="/installment" className="text-muted-foreground hover:text-primary transition-colors">Рассрочка</Link></li>
                 <li><Link href="/warranty" className="text-muted-foreground hover:text-primary transition-colors">Гарантия</Link></li>
               </ul>
             </div>
@@ -195,11 +199,12 @@ export function Layout({ children }: { children: ReactNode }) {
               <ul className="space-y-4">
                 <li className="flex items-start gap-3 text-muted-foreground">
                   <MapPin className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-                  <span>г. Тест, ул. Тест, 1<br/>ТЦ Тест, 1 этаж</span>
+                  <span>г. Центральная площадь. д.1, здание экономического колледжа
+                    1<br/>вход с торца.</span>
                 </li>
                 <li className="flex items-center gap-3 text-muted-foreground">
                   <Phone className="h-5 w-5 text-primary shrink-0" />
-                  <span>+375 777 777 777</span>
+                  <span>+375 29 888 1020<br/> +375 44 455 8888</span>
                 </li>
               </ul>
             </div>
