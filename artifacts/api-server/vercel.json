@@ -1,5 +1,6 @@
 {
   "framework": null,
   "buildCommand": "cd ../.. && pnpm --filter @workspace/db run build && pnpm --filter @workspace/api-zod run build && cd artifacts/api-server && node build.mjs",
-  "installCommand": "cd ../.. && pnpm install --frozen-lockfile"
+  "installCommand": "cd ../.. && pnpm install --frozen-lockfile",
+  "outputDirectory": "dist"
 }
