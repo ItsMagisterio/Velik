@@ -141,6 +141,13 @@ CREATE TABLE IF NOT EXISTS `news` (
   UNIQUE KEY `news_slug_unique` (`slug`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE IF NOT EXISTS `installment_page` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `content` json NOT NULL,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- Default admin user (password: adminadmin)
 INSERT INTO `users` (`email`, `password_hash`, `name`, `role`)
 VALUES ('admin', '9d97d4836e6bfc0caa5a1bdb5bd23f43cd5e9631e3074a2733dc3ceebc4aefb5', 'Администратор', 'admin')

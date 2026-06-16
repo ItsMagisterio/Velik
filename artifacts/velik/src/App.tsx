@@ -17,6 +17,7 @@ import Profile from "@/pages/profile";
 import Repair from "@/pages/repair";
 import Promotions from "@/pages/promotions";
 import Contacts from "@/pages/contacts";
+import Installment from "@/pages/installment";
 import Admin from "@/pages/admin";
 import NotFound from "@/pages/not-found";
 
@@ -46,6 +47,7 @@ function Router() {
         <Route path="/repair" component={Repair} />
         <Route path="/promotions" component={Promotions} />
         <Route path="/contacts" component={Contacts} />
+        <Route path="/installment" component={Installment} />
         <Route path="/admin" component={Admin} />
         <Route component={NotFound} />
       </Switch>
