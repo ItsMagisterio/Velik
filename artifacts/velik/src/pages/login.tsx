@@ -11,8 +11,8 @@ import { useQueryClient } from "@tanstack/react-query";
 import { getGetMeQueryKey } from "@workspace/api-client-react";
 
 const formSchema = z.object({
-  email: z.string().email("Введите корректный email"),
-  password: z.string().min(6, "Пароль должен содержать минимум 6 символов"),
+  email: z.string().min(1, "Введите логин или email"),
+  password: z.string().min(1, "Введите пароль"),
 });
 
 export default function Login() {
@@ -35,7 +35,7 @@ export default function Login() {
         localStorage.setItem("auth_token", data.token);
         queryClient.invalidateQueries({ queryKey: getGetMeQueryKey() });
         toast({ title: "Вход выполнен успешно" });
-        setLocation("/");
+        setLocation(data.user.role === "admin" ? "/admin" : "/");
       },
       onError: (error) => {
         toast({
@@ -70,9 +70,9 @@ export default function Login() {
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-white/80">Email</FormLabel>
+                  <FormLabel className="text-white/80">Логин или Email</FormLabel>
                   <FormControl>
-                    <Input placeholder="your@email.com" type="email" className="bg-white/5 border-white/10 text-white h-12" {...field} />
+                    <Input placeholder="admin или your@email.com" type="text" className="bg-white/5 border-white/10 text-white h-12" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

@@ -110,5 +110,14 @@ for (let i = 1; i <= 8; i++) {
   await conn.query("UPDATE categories SET product_count = ? WHERE id = ?", [cnt, i]);
 }
 
+// Upsert default admin user
+const adminHash = "9d97d4836e6bfc0caa5a1bdb5bd23f43cd5e9631e3074a2733dc3ceebc4aefb5";
+await conn.query(
+  `INSERT INTO users (email, password_hash, name, role)
+   VALUES ('admin', ?, 'Администратор', 'admin')
+   ON DUPLICATE KEY UPDATE password_hash=?, role='admin'`,
+  [adminHash, adminHash]
+);
+
 await conn.end();
-console.log("Seed complete: 8 categories, 8 products.");
+console.log("Seed complete: 8 categories, 8 products, admin user.");

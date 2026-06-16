@@ -9,6 +9,8 @@ import authRouter from "./auth";
 import repairRouter from "./repair";
 import promotionsRouter from "./promotions";
 import statsRouter from "./stats";
+import newsRouter from "./news";
+import usersRouter from "./users";
 
 const router: IRouter = Router();
 
@@ -22,5 +24,7 @@ router.use(authRouter);
 router.use(repairRouter);
 router.use(promotionsRouter);
 router.use(statsRouter);
+router.use(newsRouter);
+router.use(usersRouter);
 
 export default router;
