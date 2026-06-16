@@ -61,11 +61,13 @@ async function buildAll() {
     entryPoints: [path.resolve(artifactDir, "src/index.ts")],
   });
 
-  // Vercel serverless entry (exports app without calling listen)
+  // Vercel serverless entry — CJS format required because @vercel/node expects CommonJS
   await esbuild({
     ...sharedOptions,
     entryPoints: [{ in: path.resolve(artifactDir, "api/index.ts"), out: "vercel-entry" }],
-    outExtension: { ".js": ".js" },
+    format: "cjs",
+    outExtension: { ".js": ".cjs" },
+    banner: {},
     sourcemap: false,
   });
 }
