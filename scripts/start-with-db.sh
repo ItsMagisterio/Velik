@@ -10,6 +10,17 @@ SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
 
 mkdir -p /home/runner/.mysql/{data,run,logs}
 
+init_mariadb() {
+  echo "[db] Initialising MariaDB data directory..."
+  mysql_install_db \
+    --user=runner \
+    --datadir="$DATADIR" \
+    --basedir="$MARIADB_BASE" \
+    --skip-test-db \
+    >/dev/null 2>&1
+  echo "[db] Data directory initialised."
+}
+
 start_mariadb() {
   echo "[db] Starting MariaDB..."
   "$MARIADB_BASE/bin/mysqld" \
@@ -33,8 +44,14 @@ wait_for_mariadb() {
     sleep 1
   done
   echo "[db] MariaDB failed to start. Check $LOGFILE"
+  cat "$LOGFILE" 2>/dev/null | tail -20
   exit 1
 }
+
+# Initialise data directory if empty (first run on a clean container)
+if [ ! -f "$DATADIR/mysql/user.MYD" ] && [ ! -f "$DATADIR/mysql/global_priv.MYI" ]; then
+  init_mariadb
+fi
 
 if ! mysql -u root -h 127.0.0.1 -P 3306 --connect-timeout=1 -e "SELECT 1;" >/dev/null 2>&1; then
   start_mariadb

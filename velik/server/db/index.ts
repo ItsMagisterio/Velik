@@ -1,13 +1,13 @@
 import { drizzle } from "drizzle-orm/mysql2";
 import mysql from "mysql2/promise";
+import { readFileSync } from "fs";
+import { fileURLToPath } from "url";
+import path from "path";
 import * as schema from "./schema";
 
-const mysqlUrl = process.env.MYSQL_URL;
-if (!mysqlUrl) {
-  throw new Error(
-    "MYSQL_URL must be set. Example: mysql://root@127.0.0.1:3306/velik",
-  );
-}
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const configPath = path.resolve(__dirname, "../mysql.json");
+const { url: mysqlUrl } = JSON.parse(readFileSync(configPath, "utf8")) as { url: string };
 
 const parsed = new URL(mysqlUrl);
 const JSON_COLUMNS = new Set(["images", "specs"]);
