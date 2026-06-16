@@ -2,12 +2,12 @@
   "version": 2,
   "builds": [
     {
-      "src": "dist/vercel-entry.mjs",
+      "src": "dist/vercel-entry.js",
       "use": "@vercel/node"
     }
   ],
   "routes": [
-    { "src": "/(.*)", "dest": "/dist/vercel-entry.mjs" }
+    { "src": "/(.*)", "dest": "/dist/vercel-entry.js" }
   ],
   "buildCommand": "cd ../.. && pnpm --filter @workspace/db run build && pnpm --filter @workspace/api-zod run build && pnpm --filter @workspace/api-server run build",
   "installCommand": "cd ../.. && pnpm install --no-frozen-lockfile"

@@ -65,6 +65,7 @@ async function buildAll() {
   await esbuild({
     ...sharedOptions,
     entryPoints: [{ in: path.resolve(artifactDir, "api/index.ts"), out: "vercel-entry" }],
+    outExtension: { ".js": ".js" },
     sourcemap: false,
   });
 }
