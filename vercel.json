@@ -1,6 +1,7 @@
 {
   "version": 2,
-  "buildCommand": "pnpm install && pnpm approve-builds && pnpm --filter velik run build:frontend",
+  "installCommand": "pnpm install --no-frozen-lockfile",
+  "buildCommand": "pnpm --filter velik run build:frontend",
   "outputDirectory": "velik/dist/public",
   "rewrites": [
     { "source": "/api/:path*", "destination": "/api/index" },
