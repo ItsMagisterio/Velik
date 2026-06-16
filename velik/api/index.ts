@@ -1,8 +1,7 @@
 import type { IncomingMessage, ServerResponse } from "http";
-import app from "../velik/server/app";
-import { applySchema } from "../velik/server/db/migrate";
+import app from "../server/app";
+import { applySchema } from "../server/db/migrate";
 
-// Выполняется один раз при холодном старте
 const ready = applySchema().catch((err) => {
   console.error("[db] applySchema failed:", err);
 });
