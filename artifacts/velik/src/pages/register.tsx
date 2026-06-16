@@ -46,7 +46,7 @@ export default function Register() {
     }, {
       onSuccess: (data) => {
         localStorage.setItem("auth_token", data.token);
-        toast({ title: "Регистрация успешна", description: "Добро пожаловать в VELIK!" });
+        toast({ title: "Регистрация успешна", description: "Добро пожаловать в ВЕЛIК!" });
         setLocation("/");
       },
       onError: (error) => {
@@ -67,11 +67,9 @@ export default function Register() {
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-secondary to-primary" />
         
         <div className="text-center mb-8">
-          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white font-bold text-2xl mx-auto mb-6 shadow-[0_0_20px_rgba(43,127,255,0.5)]">
-            V
-          </div>
+
           <h1 className="text-3xl font-display font-bold text-white mb-2">Создать аккаунт</h1>
-          <p className="text-muted-foreground">Присоединяйтесь к сообществу VELIK.</p>
+          <p className="text-muted-foreground">Присоединяйтесь к сообществу ВЕЛIК.</p>
         </div>
 
         <Form {...form}>

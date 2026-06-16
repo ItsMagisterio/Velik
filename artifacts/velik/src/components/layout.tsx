@@ -45,10 +45,7 @@ export function Layout({ children }: { children: ReactNode }) {
         <div className="container mx-auto px-4 md:px-6 flex items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 group z-50">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white font-bold text-xl shadow-[0_0_20px_rgba(90,49,255,0.5)] group-hover:shadow-[0_0_30px_rgba(90,49,255,0.8)] transition-all duration-300">
-              V
-            </div>
-            <span className="font-display font-bold text-2xl tracking-tight hidden sm:block text-glow">VELIK</span>
+            <span className="font-display font-bold text-2xl tracking-tight hidden sm:block text-glow">ВЕЛIК</span>
           </Link>
 
           {/* Desktop Nav */}
@@ -157,12 +154,12 @@ export function Layout({ children }: { children: ReactNode }) {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-10 mb-12">
             <div>
               <Link href="/" className="flex items-center gap-2 mb-6">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white font-bold text-lg">V</div>
-                <span className="font-display font-bold text-xl tracking-tight text-white">VELIK</span>
+                <span className="font-display font-bold text-xl tracking-tight text-white">ВЕЛIК</span>
               </Link>
-              <p className="text-muted-foreground mb-6">
+              <p className="text-muted-foreground mb-2">
                 Премиальный магазин электротранспорта и велосипедов. Будущее городской мобильности.
               </p>
+              <p className="text-white/40 italic text-sm mb-6">«Велiк — кататься с удовольствием»</p>
               <div className="flex gap-4">
                 {/* Social icons would go here */}
                 <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-primary/20 hover:text-primary transition-colors cursor-pointer">
@@ -210,13 +207,21 @@ export function Layout({ children }: { children: ReactNode }) {
             </div>
           </div>
           
-          <div className="border-t border-white/5 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-sm text-muted-foreground">
-              © {new Date().getFullYear()} VELIK. Все права защищены.
-            </p>
-            <div className="flex items-center gap-4 text-sm text-muted-foreground">
-              <Link href="/privacy" className="hover:text-white transition-colors">Политика конфиденциальности</Link>
-              <Link href="/terms" className="hover:text-white transition-colors">Пользовательское соглашение</Link>
+          <div className="border-t border-white/5 pt-8 flex flex-col gap-6">
+            <div className="flex items-center gap-3 flex-wrap">
+              <span className="text-xs text-muted-foreground mr-1">Способы оплаты:</span>
+              {["payment1.avif","payment3.avif","payment4.avif","payment5.avif","payment8.avif"].map((file) => (
+                <img key={file} src={`/${file}`} alt="" className="h-16 object-contain opacity-80 hover:opacity-100 transition-opacity" />
+              ))}
+            </div>
+            <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+              <p className="text-sm text-muted-foreground">
+                © {new Date().getFullYear()} ВЕЛIК. Все права защищены.
+              </p>
+              <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                <Link href="/privacy" className="hover:text-white transition-colors">Политика конфиденциальности</Link>
+                <Link href="/terms" className="hover:text-white transition-colors">Пользовательское соглашение</Link>
+              </div>
             </div>
           </div>
         </div>
