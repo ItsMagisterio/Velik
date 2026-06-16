@@ -1,3 +1,4 @@
+import type { IncomingMessage, ServerResponse } from "http";
 import app from "../velik/server/app";
 import { applySchema } from "../velik/server/db/migrate";
 
@@ -6,7 +7,10 @@ const ready = applySchema().catch((err) => {
   console.error("[db] applySchema failed:", err);
 });
 
-export default async (req: any, res: any) => {
+export default async (req: IncomingMessage, res: ServerResponse) => {
   await ready;
-  app(req, res);
+  app.handle(req, res, () => {
+    res.statusCode = 404;
+    res.end("Not found");
+  });
 };
