@@ -3,7 +3,7 @@ import { useLocation } from "wouter";
 import { useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { DollarSign, Package, Users, Wrench, LayoutDashboard, Tag, Newspaper, Megaphone, CreditCard } from "lucide-react";
+import { DollarSign, Package, Users, Wrench, LayoutDashboard, Tag, Newspaper, Megaphone } from "lucide-react";
 import CategoriesTab from "./admin/categories-tab";
 import ProductsTab from "./admin/products-tab";
 import OrdersTab from "./admin/orders-tab";
@@ -11,7 +11,6 @@ import RepairsTab from "./admin/repairs-tab";
 import NewsTab from "./admin/news-tab";
 import PromotionsTab from "./admin/promotions-tab";
 import UsersTab from "./admin/users-tab";
-import InstallmentTab from "./admin/installment-tab";
 
 export default function Admin() {
   const [, setLocation] = useLocation();
@@ -100,9 +99,6 @@ export default function Admin() {
           <TabsTrigger value="promotions" className="gap-1.5 text-xs">
             <Megaphone className="h-3.5 w-3.5" /> Акции
           </TabsTrigger>
-          <TabsTrigger value="installment" className="gap-1.5 text-xs">
-            <CreditCard className="h-3.5 w-3.5" /> Рассрочка
-          </TabsTrigger>
           <TabsTrigger value="users" className="gap-1.5 text-xs">
             <Users className="h-3.5 w-3.5" /> Пользователи
           </TabsTrigger>
@@ -114,7 +110,6 @@ export default function Admin() {
         <TabsContent value="repairs"><RepairsTab /></TabsContent>
         <TabsContent value="news"><NewsTab /></TabsContent>
         <TabsContent value="promotions"><PromotionsTab /></TabsContent>
-        <TabsContent value="installment"><InstallmentTab /></TabsContent>
         <TabsContent value="users"><UsersTab /></TabsContent>
       </Tabs>
     </div>

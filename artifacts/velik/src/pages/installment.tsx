@@ -1,24 +1,8 @@
-import { useEffect, useState } from "react";
 import { CreditCard } from "lucide-react";
-import { defaultInstallmentContent, type InstallmentPageContent } from "@/lib/installment-content";
+import { defaultInstallmentContent } from "@/lib/installment-content";
 
 export default function Installment() {
-  const [content, setContent] = useState<InstallmentPageContent>(defaultInstallmentContent);
-
-  useEffect(() => {
-    let cancelled = false;
-    fetch("/api/installment-page")
-      .then((res) => (res.ok ? res.json() : defaultInstallmentContent))
-      .then((data) => {
-        if (!cancelled) setContent({ ...defaultInstallmentContent, ...data });
-      })
-      .catch(() => {
-        if (!cancelled) setContent(defaultInstallmentContent);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  const content = defaultInstallmentContent;
 
   return (
     <div className="container mx-auto px-4 py-12">

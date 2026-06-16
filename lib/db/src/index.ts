@@ -10,7 +10,7 @@ if (!mysqlUrl) {
 }
 
 const parsed = new URL(mysqlUrl);
-const JSON_COLUMNS = new Set(["images", "specs", "content"]);
+const JSON_COLUMNS = new Set(["images", "specs"]);
 
 export const pool = mysql.createPool({
   host: parsed.hostname,

@@ -11,7 +11,6 @@ import promotionsRouter from "./promotions";
 import statsRouter from "./stats";
 import newsRouter from "./news";
 import usersRouter from "./users";
-import installmentPageRouter from "./installment-page";
 
 const router: IRouter = Router();
 
@@ -27,6 +26,5 @@ router.use(promotionsRouter);
 router.use(statsRouter);
 router.use(newsRouter);
 router.use(usersRouter);
-router.use(installmentPageRouter);
 
 export default router;
