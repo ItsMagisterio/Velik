@@ -1,9 +1,10 @@
-import { mysqlTable, text, serial, float, timestamp } from "drizzle-orm/mysql-core";
+import { mysqlTable, text, serial, float, int, timestamp } from "drizzle-orm/mysql-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 
 export const repairRequestsTable = mysqlTable("repair_requests", {
   id: serial("id").primaryKey(),
+  userId: int("user_id"),
   customerName: text("customer_name").notNull(),
   customerPhone: text("customer_phone").notNull(),
   customerEmail: text("customer_email"),

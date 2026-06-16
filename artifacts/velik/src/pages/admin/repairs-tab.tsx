@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { adminFetch } from "./api";
+import { Trash2 } from "lucide-react";
 
 type Repair = {
   id: number;
@@ -59,6 +60,17 @@ export default function RepairsTab() {
     }
   }
 
+  async function remove(id: number) {
+    if (!confirm(`Удалить заявку #${id}? Это действие нельзя отменить.`)) return;
+    try {
+      await adminFetch<void>("DELETE", `/api/repair-requests/${id}`);
+      setRepairs((prev) => prev.filter((r) => r.id !== id));
+      toast({ title: "Заявка удалена" });
+    } catch {
+      toast({ title: "Ошибка при удалении", variant: "destructive" });
+    }
+  }
+
   return (
     <div className="glass-card rounded-2xl overflow-hidden border border-white/5">
       <div className="px-6 py-4 border-b border-white/5">
@@ -73,11 +85,12 @@ export default function RepairsTab() {
             <TableHead className="text-muted-foreground">Дата</TableHead>
             <TableHead className="text-muted-foreground">Оценка (BYN)</TableHead>
             <TableHead className="text-muted-foreground">Статус</TableHead>
+            <TableHead />
           </TableRow>
         </TableHeader>
         <TableBody>
           {loading ? (
-            <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">Загрузка...</TableCell></TableRow>
+            <TableRow><TableCell colSpan={7} className="text-center text-muted-foreground py-8">Загрузка...</TableCell></TableRow>
           ) : repairs.map((r) => (
             <TableRow key={r.id} className="border-white/5 hover:bg-white/5">
               <TableCell className="text-white/60">#{r.id}</TableCell>
@@ -120,6 +133,17 @@ export default function RepairsTab() {
                     ))}
                   </SelectContent>
                 </Select>
+              </TableCell>
+              <TableCell>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="h-7 w-7 p-0 text-white/30 hover:text-red-400 hover:bg-red-400/10"
+                  onClick={() => remove(r.id)}
+                  title="Удалить заявку"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </Button>
               </TableCell>
             </TableRow>
           ))}

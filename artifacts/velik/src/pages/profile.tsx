@@ -1,11 +1,22 @@
-import { useGetMe, useLogout, useListOrders, useGetWishlist } from "@workspace/api-client-react";
+import {
+  useGetMe,
+  useLogout,
+  useListOrders,
+  useGetWishlist,
+  useListNotifications,
+  useMarkNotificationRead,
+  useMarkAllNotificationsRead,
+  useDeleteNotification,
+  useDeleteAllNotifications,
+  getListNotificationsQueryKey,
+} from "@workspace/api-client-react";
 import { useLocation } from "wouter";
 import { useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { useQueryClient } from "@tanstack/react-query";
 import { getGetMeQueryKey, getListOrdersQueryKey } from "@workspace/api-client-react";
-import { LogOut, Package, Heart, Settings, Clock, CheckCircle2, Truck } from "lucide-react";
+import { LogOut, Package, Heart, Settings, Clock, CheckCircle2, Truck, Bell, Wrench, DollarSign, CheckCheck, Trash2 } from "lucide-react";
 import { ProductCard } from "@/components/product-card";
 
 export default function Profile() {
@@ -13,14 +24,23 @@ export default function Profile() {
   const queryClient = useQueryClient();
   const { data: user, isLoading: isUserLoading, error } = useGetMe();
   const logout = useLogout();
-  
-  const { data: orders } = useListOrders({}, { 
-    query: { enabled: !!user } 
+
+  const { data: orders } = useListOrders({}, {
+    query: { enabled: !!user }
   });
-  
+
   const { data: wishlist } = useGetWishlist({
     query: { enabled: !!user }
   });
+
+  const { data: notifications } = useListNotifications({
+    query: { enabled: !!user }
+  });
+
+  const markRead = useMarkNotificationRead();
+  const markAllRead = useMarkAllNotificationsRead();
+  const deleteOne = useDeleteNotification();
+  const deleteAll = useDeleteAllNotifications();
 
   useEffect(() => {
     if (!isUserLoading && (error || !user)) {
@@ -38,9 +58,43 @@ export default function Profile() {
     });
   };
 
+  const handleMarkRead = (id: number) => {
+    markRead.mutate({ id }, {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: getListNotificationsQueryKey() });
+      }
+    });
+  };
+
+  const handleMarkAllRead = () => {
+    markAllRead.mutate(undefined, {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: getListNotificationsQueryKey() });
+      }
+    });
+  };
+
+  const handleDeleteOne = (id: number) => {
+    deleteOne.mutate({ id }, {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: getListNotificationsQueryKey() });
+      }
+    });
+  };
+
+  const handleDeleteAll = () => {
+    deleteAll.mutate(undefined, {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: getListNotificationsQueryKey() });
+      }
+    });
+  };
+
   if (isUserLoading || !user) {
     return <div className="container mx-auto px-4 py-24 text-center">Загрузка...</div>;
   }
+
+  const unreadCount = notifications?.filter((n) => !n.isRead).length ?? 0;
 
   const getStatusIcon = (status: string) => {
     switch(status) {
@@ -63,6 +117,26 @@ export default function Profile() {
     }
   };
 
+  const getNotificationIcon = (type: string) => {
+    switch (type) {
+      case 'status_changed': return <Wrench className="h-4 w-4 text-blue-400 shrink-0" />;
+      case 'cost_updated': return <DollarSign className="h-4 w-4 text-green-400 shrink-0" />;
+      default: return <Bell className="h-4 w-4 text-primary shrink-0" />;
+    }
+  };
+
+  const formatRelativeTime = (iso: string) => {
+    const diff = Date.now() - new Date(iso).getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1) return 'только что';
+    if (mins < 60) return `${mins} мин. назад`;
+    const hours = Math.floor(mins / 60);
+    if (hours < 24) return `${hours} ч. назад`;
+    const days = Math.floor(hours / 24);
+    if (days < 7) return `${days} дн. назад`;
+    return new Date(iso).toLocaleDateString('ru-RU');
+  };
+
   return (
     <div className="container mx-auto px-4 py-12">
       <div className="flex flex-col md:flex-row gap-8 items-start mb-12">
@@ -80,9 +154,17 @@ export default function Profile() {
       </div>
 
       <Tabs defaultValue="orders" className="w-full">
-        <TabsList className="bg-white/5 border border-white/10 mb-8 rounded-xl p-1 inline-flex h-12">
+        <TabsList className="bg-white/5 border border-white/10 mb-8 rounded-xl p-1 inline-flex h-12 flex-wrap gap-0">
           <TabsTrigger value="orders" className="rounded-lg data-[state=active]:bg-white/10 data-[state=active]:text-white">
             <Package className="mr-2 h-4 w-4" /> Заказы
+          </TabsTrigger>
+          <TabsTrigger value="notifications" className="rounded-lg data-[state=active]:bg-white/10 data-[state=active]:text-white relative">
+            <Bell className="mr-2 h-4 w-4" /> Уведомления
+            {unreadCount > 0 && (
+              <span className="ml-2 inline-flex items-center justify-center h-5 min-w-5 px-1 rounded-full bg-primary text-white text-[11px] font-bold leading-none">
+                {unreadCount}
+              </span>
+            )}
           </TabsTrigger>
           <TabsTrigger value="wishlist" className="rounded-lg data-[state=active]:bg-white/10 data-[state=active]:text-white">
             <Heart className="mr-2 h-4 w-4" /> Избранное
@@ -107,7 +189,7 @@ export default function Profile() {
                       <span className="text-white font-medium">{getStatusText(order.status)}</span>
                     </div>
                   </div>
-                  
+
                   <div className="space-y-4 mb-6">
                     {order.items.map(item => (
                       <div key={item.id} className="flex items-center gap-4">
@@ -119,7 +201,7 @@ export default function Profile() {
                       </div>
                     ))}
                   </div>
-                  
+
                   <div className="flex justify-between items-center pt-4 border-t border-white/10">
                     <span className="text-muted-foreground">Итого:</span>
                     <span className="text-xl font-bold text-white">{order.total.toLocaleString('ru-RU')} BYN</span>
@@ -132,6 +214,89 @@ export default function Profile() {
               <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
               <h3 className="text-xl font-bold text-white mb-2">У вас пока нет заказов</h3>
               <p className="text-muted-foreground">Самое время выбрать что-нибудь интересное в каталоге.</p>
+            </div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="notifications">
+          {notifications && notifications.length > 0 ? (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm text-muted-foreground">{notifications.length} уведомл.</span>
+                <div className="flex items-center gap-2">
+                  {unreadCount > 0 && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-muted-foreground hover:text-white text-xs"
+                      onClick={handleMarkAllRead}
+                      disabled={markAllRead.isPending}
+                    >
+                      <CheckCheck className="mr-1.5 h-3.5 w-3.5" />
+                      Все прочитаны
+                    </Button>
+                  )}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-red-400/60 hover:text-red-400 text-xs"
+                    onClick={handleDeleteAll}
+                    disabled={deleteAll.isPending}
+                  >
+                    <Trash2 className="mr-1.5 h-3.5 w-3.5" />
+                    Очистить всё
+                  </Button>
+                </div>
+              </div>
+              {notifications.map((n) => (
+                <div
+                  key={n.id}
+                  className={`glass-card rounded-xl p-4 flex items-start gap-3 transition-all ${
+                    !n.isRead ? "border border-primary/30 bg-primary/5" : "border border-white/5 opacity-70"
+                  }`}
+                >
+                  <div className="mt-0.5 p-2 rounded-lg bg-white/5">
+                    {getNotificationIcon(n.type)}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between gap-2">
+                      <p className={`text-sm font-semibold leading-snug ${n.isRead ? "text-white/70" : "text-white"}`}>
+                        {n.title}
+                      </p>
+                      <div className="flex items-center gap-2 shrink-0">
+                        {!n.isRead && (
+                          <span className="w-2 h-2 rounded-full bg-primary mt-1.5" />
+                        )}
+                        <button
+                          onClick={() => handleDeleteOne(n.id)}
+                          className="text-white/20 hover:text-red-400 transition-colors mt-0.5"
+                          title="Удалить"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                    <p className="text-sm text-muted-foreground mt-0.5 leading-relaxed whitespace-pre-line">{n.message}</p>
+                    <div className="flex items-center justify-between mt-2">
+                      <span className="text-xs text-white/30">{formatRelativeTime(n.createdAt)}</span>
+                      {!n.isRead && (
+                        <button
+                          onClick={() => handleMarkRead(n.id)}
+                          className="text-xs text-primary/70 hover:text-primary transition-colors"
+                        >
+                          Прочитано
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="glass-card rounded-2xl p-12 text-center">
+              <Bell className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-xl font-bold text-white mb-2">Нет уведомлений</h3>
+              <p className="text-muted-foreground">Здесь будут появляться обновления по вашим заявкам на ремонт.</p>
             </div>
           )}
         </TabsContent>
@@ -155,7 +320,6 @@ export default function Profile() {
         <TabsContent value="settings">
           <div className="glass-card rounded-2xl p-8 max-w-2xl">
             <h3 className="text-xl font-bold text-white mb-6">Личные данные</h3>
-            {/* Settings form would go here */}
             <p className="text-muted-foreground">Настройки профиля в разработке.</p>
           </div>
         </TabsContent>

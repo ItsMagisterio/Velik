@@ -53,3 +53,4 @@ export * from './statsSummary';
 export * from './user';
 export * from './userRole';
 export * from './userUpdate';
+export * from './notification';

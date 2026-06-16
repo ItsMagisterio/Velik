@@ -822,3 +822,43 @@ export const GetPopularBrandsResponseItem = zod.object({
 export const GetPopularBrandsResponse = zod.array(GetPopularBrandsResponseItem)
 
 
+/**
+ * @summary List notifications for current user
+ */
+export const ListNotificationsResponseItem = zod.object({
+  "id": zod.number(),
+  "userId": zod.number(),
+  "type": zod.string(),
+  "title": zod.string(),
+  "message": zod.string(),
+  "isRead": zod.boolean(),
+  "repairRequestId": zod.number().nullish(),
+  "createdAt": zod.string()
+})
+export const ListNotificationsResponse = zod.array(ListNotificationsResponseItem)
+
+
+/**
+ * @summary Mark notification as read
+ */
+export const MarkNotificationReadParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+
+/**
+ * @summary Delete a notification
+ */
+export const DeleteNotificationParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+
+/**
+ * @summary Get unread notifications count
+ */
+export const GetUnreadNotificationsCountResponse = zod.object({
+  "count": zod.number()
+})
+
+

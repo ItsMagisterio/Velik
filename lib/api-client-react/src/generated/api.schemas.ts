@@ -468,3 +468,19 @@ status?: string | null;
 page?: number | null;
 };
 
+export interface Notification {
+  id: number;
+  userId: number;
+  type: string;
+  title: string;
+  message: string;
+  isRead: boolean;
+  /** @nullable */
+  repairRequestId?: number | null;
+  createdAt: string;
+}
+
+export interface UnreadNotificationsCount {
+  count: number;
+}
+

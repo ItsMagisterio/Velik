@@ -8,3 +8,4 @@ export * from "./repair";
 export * from "./promotions";
 export * from "./wishlist";
 export * from "./news";
+export * from "./notifications";
