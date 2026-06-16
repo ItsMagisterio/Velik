@@ -20,7 +20,7 @@ export default function Contacts() {
                 </div>
                 <div>
                   <h3 className="text-white font-medium mb-1">Адрес магазина и сервиса</h3>
-                  <p className="text-muted-foreground">г. Тест, ул. Тест, 1<br/>ТЦ Тест, 1 этаж</p>
+                  <p className="text-muted-foreground"> Центральная площадь. д.1, здание экономического колледжа <br/>вход с торца.</p>
                 </div>
               </div>
               
@@ -30,7 +30,7 @@ export default function Contacts() {
                 </div>
                 <div>
                   <h3 className="text-white font-medium mb-1">Телефон</h3>
-                  <p className="text-muted-foreground">+375 777 777 777</p>
+                  <p className="text-muted-foreground">+375 29 888 1020 <br/> +375 44 455 8888</p>
                 </div>
               </div>
               
@@ -40,7 +40,7 @@ export default function Contacts() {
                 </div>
                 <div>
                   <h3 className="text-white font-medium mb-1">Время работы</h3>
-                  <p className="text-muted-foreground">Ежедневно с 10:00 до 22:00<br/>Без выходных</p>
+                  <p className="text-muted-foreground">Понедельник- пятница : 10:00–18:00<br/>Суббота - Воскресенье: 10:00-16:00<br/>Обед с 13:00 до 14:00<br/>ВЫХОДНЫЕ: ВТОРНИК, СРЕДА</p>
                 </div>
               </div>
               
@@ -50,7 +50,7 @@ export default function Contacts() {
                 </div>
                 <div>
                   <h3 className="text-white font-medium mb-1">Email</h3>
-                  <p className="text-muted-foreground">test@test.by</p>
+                  <p className="text-muted-foreground">velo.dream.by@gmail.com </p>
                 </div>
               </div>
             </div>
