@@ -10,5 +10,5 @@
     { "src": "/(.*)", "dest": "/api/index.ts" }
   ],
   "buildCommand": "cd ../.. && pnpm --filter @workspace/db run build && pnpm --filter @workspace/api-zod run build",
-  "installCommand": "cd ../.. && pnpm install --frozen-lockfile"
+  "installCommand": "cd ../.. && pnpm install --no-frozen-lockfile"
 }
