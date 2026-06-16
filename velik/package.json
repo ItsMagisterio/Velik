@@ -9,6 +9,7 @@
     "build:frontend": "vite build --config vite.config.ts",
     "start": "node --enable-source-maps dist/index.mjs",
     "typecheck": "tsc --noEmit",
+    "build:vercel": "node scripts/build-vercel.mjs",
     "db:push": "drizzle-kit push"
   },
   "dependencies": {
