@@ -61,11 +61,15 @@ async function buildAll() {
     entryPoints: [path.resolve(artifactDir, "src/index.ts")],
   });
 
-  // Vercel serverless entry — CJS format required because @vercel/node expects CommonJS
+  // Vercel serverless bundle — CJS, output to api/_bundle.cjs
+  // Files starting with _ are ignored by Vercel's function auto-discovery.
+  // Bundled from src/app.ts directly to avoid Vercel TypeScript compilation
+  // (workspace packages export .ts files which only work with moduleResolution:bundler).
   await esbuild({
     ...sharedOptions,
-    entryPoints: [{ in: path.resolve(artifactDir, "api/index.ts"), out: "vercel-entry" }],
+    entryPoints: [{ in: path.resolve(artifactDir, "src/app.ts"), out: "_bundle" }],
     format: "cjs",
+    outdir: path.resolve(artifactDir, "api"),
     outExtension: { ".js": ".cjs" },
     banner: {},
     sourcemap: false,
