@@ -61,10 +61,6 @@ localPort = 3306
 externalPort = 3001
 
 [[ports]]
-localPort = 5000
-externalPort = 5000
-
-[[ports]]
 localPort = 8080
 externalPort = 80
 
@@ -82,3 +78,4 @@ channel = "stable-25_05"
 [userenv]
 
 [userenv.shared]
+MYSQL_URL = "mysql://root@127.0.0.1:3306/velik"
