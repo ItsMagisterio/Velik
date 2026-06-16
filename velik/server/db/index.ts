@@ -6,9 +6,9 @@ import path from "path";
 import * as schema from "./schema";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const configPath = path.resolve(__dirname, "../mysql.json");
-const { url: mysqlUrl } = JSON.parse(readFileSync(configPath, "utf8")) as { url: string };
-
+const { url: mysqlUrl } = JSON.parse(
+  readFileSync(path.resolve(__dirname, "../mysql.json"), "utf8")
+) as { url: string };
 const parsed = new URL(mysqlUrl);
 const JSON_COLUMNS = new Set(["images", "specs"]);
 

@@ -8,7 +8,7 @@ import { execSync } from "node:child_process";
 
 globalThis.require = createRequire(import.meta.url);
 
-const projectDir = path.dirname(fileURLToPath(import.meta.url));
+const projectDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const distDir = path.resolve(projectDir, "dist");
 const isProd = process.env.NODE_ENV === "production";
 

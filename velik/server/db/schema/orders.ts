@@ -1,17 +1,17 @@
-import { mysqlTable, text, serial, int, float, timestamp } from "drizzle-orm/mysql-core";
+import { mysqlTable, text, varchar, serial, int, float, timestamp } from "drizzle-orm/mysql-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 
 export const ordersTable = mysqlTable("orders", {
   id: serial("id").primaryKey(),
-  status: text("status").notNull().default("pending"),
+  status: varchar("status", { length: 50 }).notNull().default("pending"),
   total: float("total").notNull(),
   customerName: text("customer_name").notNull(),
   customerPhone: text("customer_phone").notNull(),
   customerEmail: text("customer_email"),
   deliveryAddress: text("delivery_address"),
-  deliveryMethod: text("delivery_method").notNull().default("delivery"),
-  paymentMethod: text("payment_method").notNull().default("cash"),
+  deliveryMethod: varchar("delivery_method", { length: 50 }).notNull().default("delivery"),
+  paymentMethod: varchar("payment_method", { length: 50 }).notNull().default("cash"),
   comment: text("comment"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });

@@ -63,12 +63,6 @@ fi
 mysql -u root -h 127.0.0.1 -P 3306 -e \
   "CREATE DATABASE IF NOT EXISTS velik CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;" 2>/dev/null
 
-echo "[db] Applying schema..."
-mysql -u root -h 127.0.0.1 -P 3306 velik < "$SCRIPT_DIR/schema.sql" 2>/dev/null || true
-
-echo "[db] Seeding default data..."
-node "$SCRIPT_DIR/seed.mjs" 2>/dev/null || true
-
 echo "[db] Database 'velik' ready."
 
 exec "$@"

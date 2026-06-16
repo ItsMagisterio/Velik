@@ -1,4 +1,4 @@
-import { mysqlTable, text, serial, timestamp } from "drizzle-orm/mysql-core";
+import { mysqlTable, text, varchar, serial, timestamp } from "drizzle-orm/mysql-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 
@@ -8,7 +8,7 @@ export const usersTable = mysqlTable("users", {
   passwordHash: text("password_hash").notNull(),
   name: text("name").notNull(),
   phone: text("phone"),
-  role: text("role").notNull().default("user"),
+  role: varchar("role", { length: 20 }).notNull().default("user"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 

@@ -4,11 +4,12 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "cross-env NODE_ENV=development PORT=5000 node build.mjs && cross-env PORT=5000 node --enable-source-maps dist/index.mjs",
-    "build": "cross-env NODE_ENV=production node build.mjs",
+    "dev": "cross-env NODE_ENV=development PORT=5000 node scripts/build.mjs && cross-env PORT=5000 node --enable-source-maps dist/index.mjs",
+    "build": "cross-env NODE_ENV=production node scripts/build.mjs",
     "build:frontend": "vite build --config vite.config.ts",
     "start": "node --enable-source-maps dist/index.mjs",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "db:push": "drizzle-kit push"
   },
   "dependencies": {
     "cookie-parser": "^1.4.7",

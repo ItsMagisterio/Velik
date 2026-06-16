@@ -2,6 +2,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import app from "./app";
 import { logger } from "./lib/logger";
+import { applySchema } from "./db/migrate";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -20,6 +21,8 @@ if (Number.isNaN(port) || port <= 0) {
 }
 
 const isDev = process.env.NODE_ENV !== "production";
+
+await applySchema();
 
 if (isDev) {
   process.env.VITE_MIDDLEWARE_MODE = "1";
@@ -46,4 +49,5 @@ app.listen(port, (err) => {
   }
 
   logger.info({ port }, "Server listening");
+  console.log(`\nVelik → http://127.0.0.1:${port}\n`);
 });
