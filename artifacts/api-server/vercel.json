@@ -1,6 +1,14 @@
 {
-  "framework": null,
-  "buildCommand": "cd ../.. && pnpm --filter @workspace/db run build && pnpm --filter @workspace/api-zod run build && cd artifacts/api-server && node build.mjs",
-  "installCommand": "cd ../.. && pnpm install --frozen-lockfile",
-  "outputDirectory": "dist"
+  "version": 2,
+  "builds": [
+    {
+      "src": "api/index.ts",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    { "src": "/(.*)", "dest": "/api/index.ts" }
+  ],
+  "buildCommand": "cd ../.. && pnpm --filter @workspace/db run build && pnpm --filter @workspace/api-zod run build",
+  "installCommand": "cd ../.. && pnpm install --frozen-lockfile"
 }
