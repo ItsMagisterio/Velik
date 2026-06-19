@@ -191,7 +191,7 @@ export default function Checkout() {
                               <RadioGroupItem value="delivery" className="border-white/20 text-primary data-[state=checked]:border-primary" />
                             </FormControl>
                             <FormLabel className="font-medium text-white cursor-pointer w-full">
-                              Курьером по Минску
+                              Доставка курьерской службой
                               <p className="text-sm text-muted-foreground mt-1 font-normal">Бесплатно, сегодня-завтра</p>
                             </FormLabel>
                           </FormItem>
