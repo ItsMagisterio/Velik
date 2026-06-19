@@ -39,7 +39,7 @@ export default function Contacts() {
               </div>
               <div>
                 <h3 className="text-white font-medium mb-1">Телефон</h3>
-                <p className="text-muted-foreground">+375 29 888 1020 <br/> +375 44 455 8888</p>
+                <p className="text-muted-foreground">+375 44 455 88 88</p>
               </div>
             </div>
 

@@ -20,6 +20,12 @@ import NewsPage from "@/pages/news";
 import NewsDetailPage from "@/pages/news-detail";
 import Contacts from "@/pages/contacts";
 import Installment from "@/pages/installment";
+import Delivery from "@/pages/delivery";
+import Feedback from "@/pages/feedback";
+import Returns from "@/pages/returns";
+import About from "@/pages/about";
+import SearchPage from "@/pages/search";
+import PickerPage from "@/pages/picker";
 import Admin from "@/pages/admin";
 import NotFound from "@/pages/not-found";
 
@@ -52,6 +58,12 @@ function Router() {
         <Route path="/news/:slug" component={NewsDetailPage} />
         <Route path="/contacts" component={Contacts} />
         <Route path="/installment" component={Installment} />
+        <Route path="/delivery" component={Delivery} />
+        <Route path="/feedback" component={Feedback} />
+        <Route path="/returns" component={Returns} />
+        <Route path="/about" component={About} />
+        <Route path="/search" component={SearchPage} />
+        <Route path="/picker" component={PickerPage} />
         <Route path="/admin" component={Admin} />
         <Route component={NotFound} />
       </Switch>

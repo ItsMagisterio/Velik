@@ -42,15 +42,15 @@ export function Layout({ children }: { children: ReactNode }) {
         <div className="bg-background/95 backdrop-blur-xl border-b border-white/5">
           <div className="container mx-auto px-4 md:px-6 flex items-center justify-between h-12 gap-4">
             <div className="hidden md:flex items-center gap-5">
-              <Link href="/catalog" className="text-[13px] font-medium text-foreground/70 hover:text-primary transition-colors flex items-center gap-1">
+              <Link href="/picker" className="text-[13px] font-medium text-foreground/70 hover:text-primary transition-colors flex items-center gap-1">
                 <Zap className="h-4 w-4 text-primary" /> Умный подбор
               </Link>
               <Link href="/delivery" className="text-[13px] font-medium text-foreground/70 hover:text-primary transition-colors">Оплата и доставка</Link>
-              <Link href="/catalog" className="text-[13px] font-medium text-foreground/70 hover:text-primary transition-colors">Расширенный поиск</Link>
+              <Link href="/search" className="text-[13px] font-medium text-foreground/70 hover:text-primary transition-colors">Расширенный поиск</Link>
               <Link href="/news" className="text-[13px] font-medium text-foreground/70 hover:text-primary transition-colors">Новости</Link>
-              <Link href="/contacts" className="text-[13px] font-medium text-foreground/70 hover:text-primary transition-colors">Обратная связь</Link>
+              <Link href="/feedback" className="text-[13px] font-medium text-foreground/70 hover:text-primary transition-colors">Обратная связь</Link>
               <Link href="/returns" className="text-[13px] font-medium text-foreground/70 hover:text-primary transition-colors">Обмен и возврат товара</Link>
-              <Link href="/contacts" className="text-[13px] font-medium text-foreground/70 hover:text-primary transition-colors">О магазине</Link>
+              <Link href="/about" className="text-[13px] font-medium text-foreground/70 hover:text-primary transition-colors">О магазине</Link>
             </div>
             <div className="flex items-center gap-4 ml-auto">
               <div className="hidden md:flex items-center gap-3 border-r border-white/10 pr-4">
@@ -96,7 +96,7 @@ export function Layout({ children }: { children: ReactNode }) {
             <div className="hidden lg:flex flex-col gap-1 ml-4 mr-auto">
               <a href="tel:+375444558888" className="flex items-center gap-2 text-sm font-medium text-white hover:text-primary transition-colors">
                 <Phone className="h-4 w-4 text-primary shrink-0" />
-                +375 44 455 8888
+                +375 44 455 88 88
               </a>
               <span className="text-[11px] text-foreground/40 pl-6">Без выходных, с 10:00 до 22:00</span>
             </div>
@@ -267,7 +267,7 @@ export function Layout({ children }: { children: ReactNode }) {
                 </li>
                 <li className="flex items-center gap-3 text-muted-foreground">
                   <Phone className="h-5 w-5 text-primary shrink-0" />
-                  <span>+375 29 888 1020<br/> +375 44 455 8888</span>
+                  <span>+375 44 455 88 88</span>
                 </li>
               </ul>
             </div>

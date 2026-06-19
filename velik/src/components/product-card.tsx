@@ -4,8 +4,9 @@ import { Product } from "@/api";
 import { Star, ShoppingCart, ImageOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { useAddCartItem, useGetCart } from "@/api";
+import { useAddCartItem, useGetCart, getGetCartQueryKey } from "@/api";
 import { useToast } from "@/hooks/use-toast";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface ProductCardProps {
   product: Product;
@@ -16,22 +17,30 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
   const { toast } = useToast();
   const { data: cart } = useGetCart();
   const addCartItem = useAddCartItem();
+  const queryClient = useQueryClient();
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     addCartItem.mutate({
       data: {
         productId: product.id,
         quantity: 1,
-        sessionId: localStorage.getItem("sessionId")
       }
     }, {
       onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: getGetCartQueryKey() });
         toast({
           title: "Товар добавлен в корзину",
           description: `${product.name} успешно добавлен.`
+        });
+      },
+      onError: () => {
+        toast({
+          title: "Ошибка",
+          description: "Не удалось добавить товар. Попробуйте ещё раз.",
+          variant: "destructive",
         });
       }
     });
