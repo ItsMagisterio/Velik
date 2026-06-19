@@ -16,6 +16,8 @@ import Register from "@/pages/register";
 import Profile from "@/pages/profile";
 import Repair from "@/pages/repair";
 import Promotions from "@/pages/promotions";
+import NewsPage from "@/pages/news";
+import NewsDetailPage from "@/pages/news-detail";
 import Contacts from "@/pages/contacts";
 import Installment from "@/pages/installment";
 import Admin from "@/pages/admin";
@@ -46,6 +48,8 @@ function Router() {
         <Route path="/profile" component={Profile} />
         <Route path="/repair" component={Repair} />
         <Route path="/promotions" component={Promotions} />
+        <Route path="/news" component={NewsPage} />
+        <Route path="/news/:slug" component={NewsDetailPage} />
         <Route path="/contacts" component={Contacts} />
         <Route path="/installment" component={Installment} />
         <Route path="/admin" component={Admin} />

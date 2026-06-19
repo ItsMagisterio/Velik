@@ -1,20 +1,150 @@
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Badge } from "lucide-react";
+import { ArrowRight, Badge, Calendar, Truck, ShieldCheck, Wrench, CreditCard } from "lucide-react";
 import { Link } from "wouter";
 import { useGetFeaturedProducts, useGetPopularProducts, useListCategories } from "@/api";
 import { ProductCard } from "@/components/product-card";
 import { motion } from "framer-motion";
 import { HeroSlider } from "@/components/hero-slider";
+import { useQuery } from "@tanstack/react-query";
+
+type NewsItem = {
+  id: number;
+  title: string;
+  slug: string;
+  excerpt?: string | null;
+  imageUrl?: string | null;
+  isPublished: boolean;
+  createdAt: string;
+};
 
 export default function Home() {
   const { data: categories } = useListCategories();
   const { data: featuredProducts } = useGetFeaturedProducts();
   const { data: popularProducts } = useGetPopularProducts();
+  const { data: news } = useQuery<NewsItem[]>({
+    queryKey: ["news"],
+    queryFn: () => fetch("/api/news").then((r) => r.json()),
+  });
+
+  const publishedNews = news?.filter((n) => n.isPublished) ?? [];
 
   return (
     <div className="w-full flex flex-col">
       {/* Hero Slider */}
       <HeroSlider />
+
+      {/* Benefits strip */}
+      <section className="relative z-10 -mt-1">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-white/5 rounded-2xl overflow-hidden">
+            {[
+              {
+                icon: <Truck className="w-7 h-7 text-primary" />,
+                title: "Быстрая доставка\nпо всей РБ",
+                desc: "Привезём ваш новый велосипед прямо к вашему дому в любую точку Беларуси.",
+              },
+              {
+                icon: <ShieldCheck className="w-7 h-7 text-primary" />,
+                title: "Гарантия\nкачества",
+                desc: "Мы — официальный дилер многих брендов. Только оригинальная продукция.",
+              },
+              {
+                icon: <Wrench className="w-7 h-7 text-primary" />,
+                title: "Проф. сборка\nи настройка",
+                desc: "Каждый велосипед проходит обязательное ТО-0 перед передачей клиенту.",
+              },
+              {
+                icon: <CreditCard className="w-7 h-7 text-primary" />,
+                title: "Удобная\nоплата",
+                desc: "Принимаем карты, онлайн-платежи, а также предлагаем выгодные условия рассрочки.",
+              },
+            ].map((item, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 12 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.08 }}
+                className="bg-card/60 backdrop-blur-md px-6 py-7 flex flex-col gap-3"
+              >
+                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                  {item.icon}
+                </div>
+                <h3 className="text-white font-bold text-sm uppercase tracking-wide leading-snug whitespace-pre-line">
+                  {item.title}
+                </h3>
+                <p className="text-muted-foreground text-sm leading-relaxed">{item.desc}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Latest News */}
+      {publishedNews.length > 0 && (
+        <section className="py-16 relative z-10">
+          <div className="container mx-auto px-4">
+            <div className="flex items-end justify-between mb-8">
+              <div>
+                <h2 className="text-3xl md:text-4xl font-display font-bold text-white mb-2">Последние новости</h2>
+                <p className="text-muted-foreground">Обновления, события и полезные материалы.</p>
+              </div>
+              <Link href="/news">
+                <Button variant="ghost" className="text-white hover:text-primary hidden md:flex items-center">
+                  Все новости <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {publishedNews.map((item, i) => (
+                <motion.div
+                  key={item.id}
+                  initial={{ opacity: 0, y: 16 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.07 }}
+                  className="h-full"
+                >
+                  <Link href={`/news/${item.slug}`} className="group flex flex-col glass-card rounded-2xl overflow-hidden hover:border-primary/30 border border-white/5 transition-colors duration-300 h-full">
+                    {item.imageUrl ? (
+                      <div className="aspect-[16/9] overflow-hidden">
+                        <img
+                          src={item.imageUrl}
+                          alt={item.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                      </div>
+                    ) : (
+                      <div className="aspect-[16/9] bg-gradient-to-br from-primary/20 to-secondary/10 flex items-center justify-center">
+                        <svg className="w-12 h-12 text-primary/30" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 7.5h1.5m-1.5 3h1.5m-7.5 3h7.5m-7.5 3h7.5m3-9h3.375c.621 0 1.125.504 1.125 1.125V18a2.25 2.25 0 0 1-2.25 2.25M16.5 7.5V18a2.25 2.25 0 0 0 2.25 2.25M16.5 7.5V4.875c0-.621-.504-1.125-1.125-1.125H4.125C3.504 3.75 3 4.254 3 4.875V18a2.25 2.25 0 0 0 2.25 2.25h13.5M6 7.5h3v3H6v-3Z" /></svg>
+                      </div>
+                    )}
+                    <div className="p-5">
+                      <div className="flex items-center gap-1.5 text-muted-foreground text-xs mb-3">
+                        <Calendar className="w-3.5 h-3.5" />
+                        <span>{new Date(item.createdAt).toLocaleDateString("ru-RU", { day: "numeric", month: "long", year: "numeric" })}</span>
+                      </div>
+                      <h3 className="text-white font-semibold text-base leading-snug mb-2 group-hover:text-primary transition-colors line-clamp-2">{item.title}</h3>
+                      {item.excerpt && (
+                        <p className="text-muted-foreground text-sm line-clamp-2">{item.excerpt}</p>
+                      )}
+                    </div>
+                  </Link>
+                </motion.div>
+              ))}
+            </div>
+
+            <div className="mt-6 flex justify-center md:hidden">
+              <Link href="/news">
+                <Button variant="outline" className="border-white/10 text-white hover:bg-white/10">
+                  Все новости <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Categories */}
       <section className="py-12 relative z-10">

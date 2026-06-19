@@ -214,9 +214,9 @@ export function Layout({ children }: { children: ReactNode }) {
                 <img src="/logo.png" alt="ВЕЛІК" className="h-36 w-auto" />
               </Link>
               <p className="text-muted-foreground mb-2">
-                Премиальный магазин электротранспорта и велосипедов. Будущее городской мобильности.
+                Сеть веломагазинов, основанная как велосервис. Мы разбираемся в том, что продаём.
               </p>
-              <p className="text-white/40 italic text-sm mb-6">«Велiк — кататься с удовольствием»</p>
+              <p className="text-white/40 italic text-sm mb-6">«Велосипедные решения с историей — 15 лет»</p>
               <div className="flex gap-3">
                 {/* Instagram */}
                 <a href="https://www.instagram.com/velo_dream_by/" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-primary/20 hover:text-primary transition-colors">
@@ -280,13 +280,15 @@ export function Layout({ children }: { children: ReactNode }) {
                 <img key={file} src={`/${file}`} alt="" className="h-16 object-contain opacity-80 hover:opacity-100 transition-opacity" />
               ))}
             </div>
-            <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+            <div className="flex flex-col md:flex-row justify-between items-start gap-4">
               <p className="text-sm text-muted-foreground">
                 © {new Date().getFullYear()} ВЕЛIК. Все права защищены.
               </p>
-              <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                <Link href="/privacy" className="hover:text-white transition-colors">Политика конфиденциальности</Link>
-                <Link href="/terms" className="hover:text-white transition-colors">Пользовательское соглашение</Link>
+              <div className="text-xs text-white/30 leading-relaxed md:text-right">
+                <p>ИП Мацко Владимир Владимирович</p>
+                <p>ОКПО 738138926000 · УНП 692022235 · GLN 4819303020006</p>
+                <p>Регистрация в торговом реестре РБ №418857 от 20.06.2018</p>
+                <p>Регистрация в реестре бытовых услуг №000000076238 от 25.05.2018</p>
               </div>
             </div>
           </div>
