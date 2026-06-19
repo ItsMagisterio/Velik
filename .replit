@@ -62,4 +62,3 @@ channel = "stable-25_05"
 [userenv]
 
 [userenv.shared]
-MYSQL_URL = "mysql://root@127.0.0.1:3306/velik"

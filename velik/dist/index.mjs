@@ -39328,7 +39328,7 @@ function drizzle(...params) {
 
 // server/db/index.ts
 import mysql from "mysql2/promise";
-import { readFileSync } from "fs";
+import { existsSync, readFileSync } from "fs";
 import { fileURLToPath } from "url";
 import path from "path";
 
@@ -50905,10 +50905,27 @@ var notificationsTable = mysqlTable("notifications", {
 var insertNotificationSchema = createInsertSchema(notificationsTable).omit({ id: true, createdAt: true });
 
 // server/db/index.ts
-var __dirname2 = path.dirname(fileURLToPath(import.meta.url));
-var { url: mysqlUrl } = JSON.parse(
-  readFileSync(path.resolve(__dirname2, "../mysql.json"), "utf8")
-);
+function getMysqlUrl() {
+  if (process.env.MYSQL_URL) return process.env.MYSQL_URL;
+  try {
+    const __dirname3 = path.dirname(fileURLToPath(import.meta.url));
+    const candidates = [
+      path.resolve(__dirname3, "../mysql.json"),
+      path.resolve(__dirname3, "../../mysql.json")
+    ];
+    for (const p of candidates) {
+      if (existsSync(p)) {
+        const { url: url2 } = JSON.parse(readFileSync(p, "utf8"));
+        return url2;
+      }
+    }
+  } catch {
+  }
+  throw new Error(
+    "Database URL not configured. Set the MYSQL_URL environment variable."
+  );
+}
+var mysqlUrl = getMysqlUrl();
 var parsed = new URL(mysqlUrl);
 var JSON_COLUMNS = /* @__PURE__ */ new Set(["images", "specs"]);
 var pool = mysql.createPool({
@@ -52107,7 +52124,7 @@ async function applySchema() {
 }
 
 // server/index.ts
-var __dirname3 = path2.dirname(fileURLToPath2(import.meta.url));
+var __dirname2 = path2.dirname(fileURLToPath2(import.meta.url));
 var rawPort = process.env["PORT"];
 if (!rawPort) {
   throw new Error(
@@ -52124,14 +52141,14 @@ if (isDev) {
   process.env.VITE_MIDDLEWARE_MODE = "1";
   const { createServer: createViteServer } = await import("vite");
   const vite = await createViteServer({
-    configFile: path2.resolve(__dirname3, "../vite.config.ts"),
+    configFile: path2.resolve(__dirname2, "../vite.config.ts"),
     server: { middlewareMode: true },
     appType: "spa"
   });
   app_default.use(vite.middlewares);
 } else {
   const { default: express2 } = await Promise.resolve().then(() => __toESM(require_express2(), 1));
-  const publicDir = path2.resolve(__dirname3, "public");
+  const publicDir = path2.resolve(__dirname2, "public");
   app_default.use(express2.static(publicDir));
   app_default.get("*", (_req, res) => {
     res.sendFile(path2.join(publicDir, "index.html"));
