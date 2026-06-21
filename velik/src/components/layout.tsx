@@ -89,7 +89,7 @@ export function Layout({ children }: { children: ReactNode }) {
           <div className="container mx-auto px-4 md:px-6 flex items-center gap-6">
             {/* Logo */}
             <Link href="/" className="shrink-0">
-              <img src="/logo.png" alt="ВЕЛІК" className="h-24 w-auto -my-4 object-contain" />
+              <img src="/logo.png" alt="ВЕЛІК" className="h-24 w-auto -my-4 object-contain" style={{ filter: "drop-shadow(0 0 6px rgba(210, 70, 180, 0.9)) drop-shadow(0 0 18px rgba(180, 50, 210, 0.8)) drop-shadow(0 0 40px rgba(160, 40, 200, 0.6))" }} />
             </Link>
 
             {/* Phones */}
@@ -211,7 +211,7 @@ export function Layout({ children }: { children: ReactNode }) {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-10 mb-12">
             <div>
               <Link href="/" className="flex items-center gap-2 mb-6">
-                <img src="/logo.png" alt="ВЕЛІК" className="h-36 w-auto" />
+                <img src="/logo.png" alt="ВЕЛІК" className="h-36 w-auto" style={{ filter: "drop-shadow(0 0 6px rgba(210, 70, 180, 0.9)) drop-shadow(0 0 18px rgba(180, 50, 210, 0.8)) drop-shadow(0 0 40px rgba(160, 40, 200, 0.6))" }} />
               </Link>
               <p className="text-muted-foreground mb-2">
                 Сеть веломагазинов, основанная как велосервис. Мы разбираемся в том, что продаём.
@@ -273,23 +273,21 @@ export function Layout({ children }: { children: ReactNode }) {
             </div>
           </div>
           
-          <div className="border-t border-white/5 pt-8 flex flex-col gap-6">
-            <div className="flex items-center gap-3 flex-wrap">
-              <span className="text-xs text-muted-foreground mr-1">Способы оплаты:</span>
+          <div className="border-t border-white/5 pt-6 flex flex-col md:flex-row items-center justify-between gap-4 flex-wrap">
+            <p className="text-sm text-muted-foreground shrink-0">
+              © {new Date().getFullYear()} ВЕЛIК. Все права защищены.
+            </p>
+            <div className="flex items-center gap-3 flex-wrap justify-center">
+              <span className="text-xs text-muted-foreground">Способы оплаты:</span>
               {["payment1.avif","payment3.avif","payment4.avif","payment5.avif","payment8.avif"].map((file) => (
-                <img key={file} src={`/${file}`} alt="" className="h-16 object-contain opacity-80 hover:opacity-100 transition-opacity" />
+                <img key={file} src={`/${file}`} alt="" className="h-8 object-contain opacity-80 hover:opacity-100 transition-opacity" />
               ))}
             </div>
-            <div className="flex flex-col md:flex-row justify-between items-start gap-4">
-              <p className="text-sm text-muted-foreground">
-                © {new Date().getFullYear()} ВЕЛIК. Все права защищены.
-              </p>
-              <div className="text-xs text-white/30 leading-relaxed md:text-right">
-                <p>ИП Мацко Владимир Владимирович</p>
-                <p>ОКПО 738138926000 · УНП 692022235 · GLN 4819303020006</p>
-                <p>Регистрация в торговом реестре РБ №418857 от 20.06.2018</p>
-                <p>Регистрация в реестре бытовых услуг №000000076238 от 25.05.2018</p>
-              </div>
+            <div className="text-xs text-white/30 leading-relaxed md:text-right shrink-0">
+              <p>ИП Мацко Владимир Владимирович</p>
+              <p>ОКПО 738138926000 · УНП 692022235 · GLN 4819303020006</p>
+              <p>Регистрация в торговом реестре РБ №418857 от 20.06.2018</p>
+              <p>Регистрация в реестре бытовых услуг №000000076238 от 25.05.2018</p>
             </div>
           </div>
         </div>

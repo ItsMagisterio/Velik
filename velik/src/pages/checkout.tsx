@@ -15,22 +15,34 @@ import { motion } from "framer-motion";
 import { getGetCartQueryKey } from "@/api";
 import { useQueryClient } from "@tanstack/react-query";
 
+const DELIVERY_OPTIONS = [
+  { value: "courier_rb", label: "Курьерской службой по РБ", description: "До дома в любую точку РБ, независимо от населённого пункта", price: 50 },
+  { value: "pickup", label: "Самовывоз", description: "Самовывоз из магазина в центре города", price: 0 },
+];
+
+const PAYMENT_OPTIONS = [
+  { value: "cash", label: "Наличными", description: "Оплата при получении наличными" },
+  { value: "card", label: "Пластиковые карты", description: "Visa, Mastercard, Белкарт через терминал" },
+  { value: "installment", label: "Рассрочка или кредит", description: "+12% от итоговой суммы — оформление на следующем шаге" },
+];
+
+const INSTALLMENT_RATE = 0.12;
+
+function calcTotal(cartTotal: number, deliveryMethod: string, paymentMethod: string) {
+  const delivery = DELIVERY_OPTIONS.find(o => o.value === deliveryMethod)?.price ?? 0;
+  const subtotal = cartTotal + delivery;
+  const surcharge = paymentMethod === "installment" ? Math.round(subtotal * INSTALLMENT_RATE * 100) / 100 : 0;
+  return { delivery, subtotal, surcharge, total: subtotal + surcharge };
+}
+
 const formSchema = z.object({
   customerName: z.string().min(2, "Введите ваше имя"),
   customerPhone: z.string().min(9, "Введите корректный телефон"),
   customerEmail: z.string().email("Неверный формат email").optional().or(z.literal("")),
-  deliveryMethod: z.enum(["delivery", "pickup"]),
+  deliveryMethod: z.enum(["courier_rb", "pickup"]),
   deliveryAddress: z.string().optional(),
-  paymentMethod: z.enum(["online", "cash"]),
+  paymentMethod: z.enum(["cash", "card", "installment"]),
   comment: z.string().optional()
-}).refine(data => {
-  if (data.deliveryMethod === 'delivery' && !data.deliveryAddress) {
-    return false;
-  }
-  return true;
-}, {
-  message: "Введите адрес доставки",
-  path: ["deliveryAddress"]
 });
 
 export default function Checkout() {
@@ -49,14 +61,13 @@ export default function Checkout() {
       customerName: user?.name || "",
       customerPhone: user?.phone || "",
       customerEmail: user?.email || "",
-      deliveryMethod: "delivery",
+      deliveryMethod: "pickup",
       deliveryAddress: "",
-      paymentMethod: "online",
+      paymentMethod: "cash",
       comment: "",
     },
   });
 
-  const watchDeliveryMethod = form.watch("deliveryMethod");
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
     if (!cart || cart.items.length === 0) return;
@@ -174,95 +185,81 @@ export default function Checkout() {
               </div>
 
               <div className="glass-card rounded-2xl p-8">
-                <h2 className="text-2xl font-bold text-white mb-6">Доставка</h2>
+                <h2 className="text-2xl font-bold text-white mb-6">Способ доставки</h2>
                 <FormField
                   control={form.control}
                   name="deliveryMethod"
                   render={({ field }) => (
-                    <FormItem className="space-y-4">
-                      <FormControl>
-                        <RadioGroup
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                          className="grid grid-cols-1 sm:grid-cols-2 gap-4"
-                        >
-                          <FormItem className="flex items-center space-x-3 space-y-0 rounded-xl border border-white/10 bg-white/5 p-4 cursor-pointer hover:bg-white/10 transition-colors has-[:checked]:border-primary has-[:checked]:bg-primary/5">
-                            <FormControl>
-                              <RadioGroupItem value="delivery" className="border-white/20 text-primary data-[state=checked]:border-primary" />
-                            </FormControl>
-                            <FormLabel className="font-medium text-white cursor-pointer w-full">
-                              Курьером по Минску
-                              <p className="text-sm text-muted-foreground mt-1 font-normal">Бесплатно, сегодня-завтра</p>
-                            </FormLabel>
-                          </FormItem>
-                          <FormItem className="flex items-center space-x-3 space-y-0 rounded-xl border border-white/10 bg-white/5 p-4 cursor-pointer hover:bg-white/10 transition-colors has-[:checked]:border-primary has-[:checked]:bg-primary/5">
-                            <FormControl>
-                              <RadioGroupItem value="pickup" className="border-white/20 text-primary data-[state=checked]:border-primary" />
-                            </FormControl>
-                            <FormLabel className="font-medium text-white cursor-pointer w-full">
-                              Самовывоз
-                              <p className="text-sm text-muted-foreground mt-1 font-normal">ТЦ Галерея Минск</p>
-                            </FormLabel>
-                          </FormItem>
-                        </RadioGroup>
-                      </FormControl>
+                    <FormItem className="space-y-3">
+                      <div className="rounded-xl border border-white/10 overflow-hidden divide-y divide-white/10">
+                        <div className="grid grid-cols-[1fr_auto] px-5 py-2.5 bg-white/5 text-xs font-semibold text-white/40 uppercase tracking-widest">
+                          <span>Способ доставки</span>
+                          <span>Сумма</span>
+                        </div>
+                        <FormControl>
+                          <RadioGroup onValueChange={field.onChange} defaultValue={field.value}>
+                            {DELIVERY_OPTIONS.map((opt) => (
+                              <FormItem key={opt.value} className="space-y-0">
+                                <FormLabel className="cursor-pointer">
+                                  <div className={`grid grid-cols-[auto_1fr_auto] items-center gap-4 px-5 py-4 transition-colors hover:bg-white/5 ${field.value === opt.value ? "bg-primary/10" : ""}`}>
+                                    <FormControl>
+                                      <RadioGroupItem value={opt.value} className="border-white/30 text-primary data-[state=checked]:border-primary shrink-0" />
+                                    </FormControl>
+                                    <div>
+                                      <p className={`font-medium ${field.value === opt.value ? "text-primary" : "text-white"}`}>{opt.label}</p>
+                                      <p className="text-sm text-white/40 mt-0.5 font-normal">{opt.description}</p>
+                                    </div>
+                                    <span className={`text-sm font-semibold shrink-0 ${field.value === opt.value ? "text-primary" : "text-white/60"}`}>
+                                      {opt.price === 0 ? "0,00 руб." : `${opt.price},00 руб.`}
+                                    </span>
+                                  </div>
+                                </FormLabel>
+                              </FormItem>
+                            ))}
+                          </RadioGroup>
+                        </FormControl>
+                      </div>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-
-                {watchDeliveryMethod === 'delivery' && (
-                  <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="mt-6">
-                    <FormField
-                      control={form.control}
-                      name="deliveryAddress"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-white/80">Адрес доставки *</FormLabel>
-                          <FormControl>
-                            <Input placeholder="г. Минск, ул. Примерная 1, кв 2" className="bg-white/5 border-white/10 text-white" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </motion.div>
-                )}
               </div>
 
               <div className="glass-card rounded-2xl p-8">
-                <h2 className="text-2xl font-bold text-white mb-6">Оплата</h2>
+                <h2 className="text-2xl font-bold text-white mb-6">Способ оплаты</h2>
                 <FormField
                   control={form.control}
                   name="paymentMethod"
                   render={({ field }) => (
-                    <FormItem className="space-y-4">
-                      <FormControl>
-                        <RadioGroup
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                          className="grid grid-cols-1 sm:grid-cols-2 gap-4"
-                        >
-                          <FormItem className="flex items-center space-x-3 space-y-0 rounded-xl border border-white/10 bg-white/5 p-4 cursor-pointer hover:bg-white/10 transition-colors has-[:checked]:border-primary has-[:checked]:bg-primary/5">
-                            <FormControl>
-                              <RadioGroupItem value="online" className="border-white/20 text-primary data-[state=checked]:border-primary" />
-                            </FormControl>
-                            <FormLabel className="font-medium text-white cursor-pointer w-full">
-                              Картой онлайн
-                              <p className="text-sm text-muted-foreground mt-1 font-normal">Visa, Mastercard, Белкарт</p>
-                            </FormLabel>
-                          </FormItem>
-                          <FormItem className="flex items-center space-x-3 space-y-0 rounded-xl border border-white/10 bg-white/5 p-4 cursor-pointer hover:bg-white/10 transition-colors has-[:checked]:border-primary has-[:checked]:bg-primary/5">
-                            <FormControl>
-                              <RadioGroupItem value="cash" className="border-white/20 text-primary data-[state=checked]:border-primary" />
-                            </FormControl>
-                            <FormLabel className="font-medium text-white cursor-pointer w-full">
-                              При получении
-                              <p className="text-sm text-muted-foreground mt-1 font-normal">Наличными или картой</p>
-                            </FormLabel>
-                          </FormItem>
-                        </RadioGroup>
-                      </FormControl>
+                    <FormItem className="space-y-3">
+                      <div className="rounded-xl border border-white/10 overflow-hidden divide-y divide-white/10">
+                        <div className="grid grid-cols-[1fr_auto] px-5 py-2.5 bg-white/5 text-xs font-semibold text-white/40 uppercase tracking-widest">
+                          <span>Способ оплаты</span>
+                          <span>Сумма</span>
+                        </div>
+                        <FormControl>
+                          <RadioGroup onValueChange={field.onChange} defaultValue={field.value}>
+                            {PAYMENT_OPTIONS.map((opt) => (
+                              <FormItem key={opt.value} className="space-y-0">
+                                <FormLabel className="cursor-pointer">
+                                  <div className={`grid grid-cols-[auto_1fr_auto] items-center gap-4 px-5 py-4 transition-colors hover:bg-white/5 ${field.value === opt.value ? "bg-primary/10" : ""}`}>
+                                    <FormControl>
+                                      <RadioGroupItem value={opt.value} className="border-white/30 text-primary data-[state=checked]:border-primary shrink-0" />
+                                    </FormControl>
+                                    <div>
+                                      <p className={`font-medium ${field.value === opt.value ? "text-primary" : "text-white"}`}>{opt.label}</p>
+                                      <p className="text-sm text-white/40 mt-0.5 font-normal">{opt.description}</p>
+                                    </div>
+                                    <span className={`text-sm font-semibold shrink-0 ${field.value === opt.value ? "text-primary" : "text-white/60"}`}>
+                                      {opt.value === "installment" ? "+12%" : "0,00 руб."}
+                                    </span>
+                                  </div>
+                                </FormLabel>
+                              </FormItem>
+                            ))}
+                          </RadioGroup>
+                        </FormControl>
+                      </div>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -316,20 +313,33 @@ export default function Checkout() {
             </div>
             
             <div className="border-t border-white/10 pt-4 mb-8 space-y-3">
-              <div className="flex justify-between text-muted-foreground">
-                <span>Товары ({cart.itemCount})</span>
-                <span>{cart.total.toLocaleString('ru-RU')} BYN</span>
-              </div>
-              <div className="flex justify-between text-muted-foreground">
-                <span>Доставка</span>
-                <span>{watchDeliveryMethod === 'pickup' ? '0 BYN' : 'Бесплатно'}</span>
-              </div>
-              <div className="flex justify-between items-end pt-3 mt-3 border-t border-white/10">
-                <span className="text-white font-medium">К оплате</span>
-                <span className="text-2xl font-bold text-white text-glow">
-                  {cart.total.toLocaleString('ru-RU')} <span className="text-sm font-normal text-white/70">BYN</span>
-                </span>
-              </div>
+              {(() => {
+                const { delivery, surcharge, total } = calcTotal(cart.total, form.watch("deliveryMethod"), form.watch("paymentMethod"));
+                return (
+                  <>
+                    <div className="flex justify-between text-muted-foreground">
+                      <span>Товары ({cart.itemCount})</span>
+                      <span>{cart.total.toLocaleString('ru-RU')} BYN</span>
+                    </div>
+                    <div className="flex justify-between text-muted-foreground">
+                      <span>Доставка</span>
+                      <span>{delivery === 0 ? "Бесплатно" : `${delivery} BYN`}</span>
+                    </div>
+                    {surcharge > 0 && (
+                      <div className="flex justify-between text-muted-foreground">
+                        <span>Рассрочка (+12%)</span>
+                        <span>+{surcharge.toFixed(2)} BYN</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between items-end pt-3 mt-3 border-t border-white/10">
+                      <span className="text-white font-medium">К оплате</span>
+                      <span className="text-2xl font-bold text-white text-glow">
+                        {total.toFixed(2)} <span className="text-sm font-normal text-white/70">BYN</span>
+                      </span>
+                    </div>
+                  </>
+                );
+              })()}
             </div>
             
             <Button 
