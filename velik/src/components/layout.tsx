@@ -7,11 +7,29 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect, useRef } from "react";
 import { Input } from "@/components/ui/input";
 
+const BRANDS = [
+  "Greenland", "Aist", "Altair", "Favorit", "Foxx", "Kraken",
+  "Mikado", "Kross", "Nameless", "Nasaland", "Nialanti",
+  "Novatreck", "Racer", "Stels", "Tropix", "Trek", "Cube",
+];
+
 export function Layout({ children }: { children: ReactNode }) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
-  const [location] = useLocation();
+  const [brandsOpen, setBrandsOpen] = useState(false);
+  const brandsRef = useRef<HTMLDivElement>(null);
+  const [location, navigate] = useLocation();
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (brandsRef.current && !brandsRef.current.contains(e.target as Node)) {
+        setBrandsOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const { data: cart } = useGetCart();
   const { data: user } = useGetMe();
@@ -135,18 +153,59 @@ export function Layout({ children }: { children: ReactNode }) {
                 { href: "/catalog?type=scooter", label: "Самокаты" },
                 { href: "/catalog?type=ebike", label: "Электротранспорт" },
                 { href: "/catalog?type=accessories", label: "Аксессуары" },
-                { href: "/repair", label: "Ремонт" },
+                { href: "/repair", label: "Ремонт велосипедов" },
                 { href: "/promotions", label: "Акции" },
                 { href: "/installment", label: "Рассрочка" },
               ].map(({ href, label }) => (
                 <Link
                   key={href}
                   href={href}
-                  className="text-[13px] font-medium text-foreground/70 hover:text-white hover:bg-white/5 px-4 py-3 transition-colors border-r border-white/5 last:border-r-0 whitespace-nowrap"
+                  className="text-[13px] font-medium text-foreground/70 hover:text-white hover:bg-white/5 px-4 py-3 transition-colors border-r border-white/5 whitespace-nowrap"
                 >
                   {label}
                 </Link>
               ))}
+
+              {/* Велобренды dropdown */}
+              <div ref={brandsRef} className="relative">
+                <button
+                  onClick={() => setBrandsOpen((v) => !v)}
+                  className={`flex items-center gap-1 text-[13px] font-medium px-4 py-3 transition-colors whitespace-nowrap border-r border-white/5
+                    ${brandsOpen ? "text-primary bg-white/5" : "text-foreground/70 hover:text-white hover:bg-white/5"}`}
+                >
+                  Велобренды
+                  <motion.span animate={{ rotate: brandsOpen ? 180 : 0 }} transition={{ duration: 0.2 }}>
+                    <ChevronDown className="w-3.5 h-3.5" />
+                  </motion.span>
+                </button>
+
+                <AnimatePresence>
+                  {brandsOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -6 }}
+                      transition={{ duration: 0.18 }}
+                      className="absolute left-0 top-full mt-0.5 z-50 w-64 bg-card/95 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl overflow-hidden"
+                    >
+                      <div className="p-2 grid grid-cols-2 gap-0.5">
+                        {BRANDS.map((brand) => (
+                          <button
+                            key={brand}
+                            onClick={() => {
+                              setBrandsOpen(false);
+                              navigate(`/catalog?brand=${encodeURIComponent(brand)}`);
+                            }}
+                            className="text-left px-3 py-2 text-[13px] font-medium text-foreground/70 hover:text-white hover:bg-primary/10 rounded-lg transition-colors"
+                          >
+                            {brand}
+                          </button>
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
             </nav>
           </div>
         </div>

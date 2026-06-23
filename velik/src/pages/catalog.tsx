@@ -1,5 +1,4 @@
-import { useState, useEffect } from "react";
-import { useLocation } from "wouter";
+import { useState } from "react";
 import { useListProducts, useListCategories } from "@/api";
 import { ProductCard } from "@/components/product-card";
 import { Input } from "@/components/ui/input";
@@ -9,14 +8,16 @@ import { Slider } from "@/components/ui/slider";
 import { Checkbox } from "@/components/ui/checkbox";
 import { motion } from "framer-motion";
 import { Search, SlidersHorizontal, X } from "lucide-react";
+import { CategoryHeader } from "@/components/category-header";
 
 export default function Catalog() {
-  const [location, setLocation] = useLocation();
   const searchParams = new URLSearchParams(window.location.search);
   const initialCategory = searchParams.get("category");
-  
+  const initialBrand = searchParams.get("brand") ?? "";
+
   const [search, setSearch] = useState("");
   const [categoryId, setCategoryId] = useState<number | null>(initialCategory ? parseInt(initialCategory) : null);
+  const [brand, setBrand] = useState<string>(initialBrand);
   const [minPrice, setMinPrice] = useState<number>(0);
   const [maxPrice, setMaxPrice] = useState<number>(10000);
   const [inStock, setInStock] = useState<boolean>(false);
@@ -24,22 +25,52 @@ export default function Catalog() {
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
 
   const { data: categories } = useListCategories();
-  
+
   const { data: productData, isLoading } = useListProducts({
     ...(search ? { search } : {}),
     ...(categoryId != null ? { categoryId } : {}),
+    ...(brand ? { brand } : {}),
     ...(minPrice > 0 ? { minPrice } : {}),
     ...(maxPrice < 10000 ? { maxPrice } : {}),
     ...(inStock ? { inStock } : {}),
     sortBy: sortBy as any,
   });
 
+  const activeCategory = categories?.find((c) => c.id === categoryId) ?? null;
+
+  const handlePriceFilter = (min: number, max: number) => {
+    setMinPrice(min);
+    setMaxPrice(max);
+  };
+
   return (
     <div className="container mx-auto px-4 py-12">
-      <div className="mb-12 text-center md:text-left">
-        <h1 className="text-4xl md:text-5xl font-display font-bold text-white mb-4">Каталог</h1>
-        <p className="text-muted-foreground text-lg max-w-2xl">Найдите свой идеальный электротранспорт среди сотен премиальных моделей.</p>
-      </div>
+      {/* Brand filter banner */}
+      {brand && (
+        <div className="mb-8 glass-card rounded-2xl p-5 flex items-center justify-between gap-4">
+          <div>
+            <p className="text-xs text-white/50 uppercase tracking-widest mb-1">Фильтр по бренду</p>
+            <h2 className="text-2xl font-bold text-white tracking-wide">{brand}</h2>
+            {productData?.total !== undefined && (
+              <p className="text-sm text-white/50 mt-1">{productData.total} товаров</p>
+            )}
+          </div>
+          <button
+            onClick={() => setBrand("")}
+            className="flex items-center gap-1.5 px-4 py-2 rounded-lg border border-white/10 text-white/60 hover:text-white hover:border-white/30 transition-colors text-sm"
+          >
+            <X className="w-4 h-4" /> Сбросить
+          </button>
+        </div>
+      )}
+
+      {/* Generic header shown only when NO category and NO brand is selected */}
+      {!activeCategory && !brand && (
+        <div className="mb-12 text-center md:text-left">
+          <h1 className="text-4xl md:text-5xl font-display font-bold text-white mb-4">Каталог</h1>
+          <p className="text-muted-foreground text-lg max-w-2xl">Найдите свой идеальный электротранспорт среди сотен премиальных моделей.</p>
+        </div>
+      )}
 
       <div className="flex flex-col lg:flex-row gap-8">
         {/* Mobile Filters Toggle */}
@@ -54,7 +85,7 @@ export default function Catalog() {
         </div>
 
         {/* Sidebar Filters */}
-        <motion.aside 
+        <motion.aside
           className={`lg:w-1/4 flex-shrink-0 ${isFiltersOpen ? "block" : "hidden lg:block"}`}
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -71,17 +102,17 @@ export default function Catalog() {
             <div className="mb-8">
               <h3 className="text-white font-medium mb-4">Категории</h3>
               <div className="space-y-2">
-                <Button 
-                  variant="ghost" 
+                <Button
+                  variant="ghost"
                   className={`w-full justify-start ${categoryId === null ? "text-primary bg-primary/10" : "text-muted-foreground hover:text-white"}`}
                   onClick={() => setCategoryId(null)}
                 >
                   Все категории
                 </Button>
                 {categories?.map((cat) => (
-                  <Button 
-                    key={cat.id} 
-                    variant="ghost" 
+                  <Button
+                    key={cat.id}
+                    variant="ghost"
                     className={`w-full justify-start ${categoryId === cat.id ? "text-primary bg-primary/10" : "text-muted-foreground hover:text-white"}`}
                     onClick={() => setCategoryId(cat.id)}
                   >
@@ -106,16 +137,16 @@ export default function Catalog() {
                 className="mb-6"
               />
               <div className="flex items-center gap-4">
-                <Input 
-                  type="number" 
-                  value={minPrice} 
+                <Input
+                  type="number"
+                  value={minPrice}
                   onChange={(e) => setMinPrice(Number(e.target.value))}
                   className="bg-white/5 border-white/10 text-white"
                 />
                 <span className="text-muted-foreground">-</span>
-                <Input 
-                  type="number" 
-                  value={maxPrice} 
+                <Input
+                  type="number"
+                  value={maxPrice}
                   onChange={(e) => setMaxPrice(Number(e.target.value))}
                   className="bg-white/5 border-white/10 text-white"
                 />
@@ -124,8 +155,8 @@ export default function Catalog() {
 
             {/* In Stock Only */}
             <div className="mb-8 flex items-center space-x-2">
-              <Checkbox 
-                id="in-stock" 
+              <Checkbox
+                id="in-stock"
                 checked={inStock}
                 onCheckedChange={(checked) => setInStock(checked === true)}
                 className="border-white/20 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
@@ -134,8 +165,8 @@ export default function Catalog() {
                 Только в наличии
               </label>
             </div>
-            
-            <Button 
+
+            <Button
               className="w-full bg-white/10 text-white hover:bg-white/20 border-none"
               onClick={() => {
                 setCategoryId(null);
@@ -152,18 +183,34 @@ export default function Catalog() {
 
         {/* Main Content */}
         <div className="flex-1">
+          {/* Category header — shown when a category is selected */}
+          {activeCategory && (
+            <CategoryHeader
+              category={activeCategory}
+              onCategoryChange={(id) => {
+                setCategoryId(id);
+                setMinPrice(0);
+                setMaxPrice(10000);
+                setSearch("");
+              }}
+              onPriceFilter={handlePriceFilter}
+              onSearchFilter={setSearch}
+              totalProducts={productData?.total}
+            />
+          )}
+
           {/* Top Bar */}
           <div className="glass rounded-xl p-4 mb-8 flex flex-col sm:flex-row gap-4 justify-between items-center z-10 relative">
             <div className="relative w-full sm:w-1/2">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input 
-                placeholder="Поиск по названию..." 
+              <Input
+                placeholder="Поиск по названию..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="pl-9 bg-white/5 border-white/10 text-white focus-visible:ring-primary w-full"
               />
             </div>
-            
+
             <div className="flex items-center gap-4 w-full sm:w-auto">
               <span className="text-sm text-muted-foreground whitespace-nowrap hidden sm:block">
                 {productData?.total || 0} товаров
@@ -193,7 +240,7 @@ export default function Catalog() {
             <div className="glass-card rounded-2xl p-12 text-center">
               <h3 className="text-2xl font-bold text-white mb-2">Ничего не найдено</h3>
               <p className="text-muted-foreground">Попробуйте изменить параметры фильтрации</p>
-              <Button 
+              <Button
                 className="mt-6 bg-primary hover:bg-primary/90 text-white"
                 onClick={() => {
                   setCategoryId(null);
