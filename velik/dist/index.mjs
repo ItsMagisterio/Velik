@@ -32415,7 +32415,11 @@ var ListProductsQueryParams = objectType({
   "inStock": coerce.boolean().nullish(),
   "sortBy": unionType([literalType("price_asc"), literalType("price_desc"), literalType("rating"), literalType("newest"), literalType(null)]).nullish(),
   "page": coerce.number().nullish(),
-  "limit": coerce.number().nullish()
+  "limit": coerce.number().nullish(),
+  "onSale": coerce.boolean().nullish(),
+  "yearFrom": coerce.number().nullish(),
+  "yearTo": coerce.number().nullish(),
+  "specFilters": coerce.string().nullish()
 });
 var ListProductsResponse = objectType({
   "items": arrayType(objectType({
@@ -51044,20 +51048,79 @@ router3.get("/products/new-arrivals", async (_req, res) => {
   const withCategory = rows.map((r) => ({ ...parseProductRow(r), categoryName: null }));
   res.json(GetNewArrivalsResponse.parse(withCategory));
 });
+router3.get("/products/filter-options", async (_req, res) => {
+  const brandsResult = await db.selectDistinct({ brand: productsTable.brand }).from(productsTable).orderBy(asc(productsTable.brand));
+  const specKeys = [
+    "\u041A\u043B\u0430\u0441\u0441 \u0432\u0435\u043B\u043E\u0441\u0438\u043F\u0435\u0434\u0430",
+    "\u0422\u0438\u043F \u043F\u043E\u043B\u044C\u0437\u043E\u0432\u0430\u0442\u0435\u043B\u044F",
+    "\u0412\u0438\u043B\u043A\u0430 (\u0442\u0438\u043F)",
+    "\u041C\u0430\u0442\u0435\u0440\u0438\u0430\u043B \u0440\u0430\u043C\u044B",
+    "\u0422\u0438\u043F \u0440\u0430\u043C\u044B",
+    "\u0420\u0430\u0437\u043C\u0435\u0440 \u0440\u0430\u043C\u044B",
+    "\u0420\u043E\u0441\u0442 \u0432\u0435\u043B\u043E\u0441\u0438\u043F\u0435\u0434\u0438\u0441\u0442\u0430",
+    "\u0422\u0438\u043F \u0442\u0440\u0430\u043D\u0441\u043C\u0438\u0441\u0441\u0438\u0438",
+    "\u041A\u043E\u043B\u0438\u0447\u0435\u0441\u0442\u0432\u043E \u0441\u043A\u043E\u0440\u043E\u0441\u0442\u0435\u0439",
+    "\u041A\u0430\u0441\u0441\u0435\u0442\u0430 \u0438\u043B\u0438 \u0442\u0440\u0435\u0449\u043E\u0442\u043A\u0430",
+    "\u0422\u0438\u043F \u043C\u0430\u043D\u0435\u0442\u043E\u043A",
+    "\u0414\u0438\u0430\u043C\u0435\u0442\u0440 \u043A\u043E\u043B\u0435\u0441",
+    "\u041F\u0435\u0440\u0435\u0434\u043D\u0438\u0439 \u0442\u043E\u0440\u043C\u043E\u0437",
+    "\u0417\u0430\u0434\u043D\u0438\u0439 \u0442\u043E\u0440\u043C\u043E\u0437",
+    "\u041C\u0430\u0442\u0435\u0440\u0438\u0430\u043B \u043F\u0435\u0434\u0430\u043B\u0435\u0439",
+    "\u0412 \u043A\u043E\u043C\u043F\u043B\u0435\u043A\u0442\u0435"
+  ];
+  const specsResult = {};
+  for (const key of specKeys) {
+    const [rows] = await db.execute(
+      sql`SELECT DISTINCT JSON_UNQUOTE(JSON_EXTRACT(specs, CONCAT('$."', ${key}, '"'))) AS value
+          FROM products
+          WHERE JSON_EXTRACT(specs, CONCAT('$."', ${key}, '"')) IS NOT NULL
+            AND JSON_UNQUOTE(JSON_EXTRACT(specs, CONCAT('$."', ${key}, '"'))) != 'null'
+          ORDER BY value`
+    );
+    specsResult[key] = rows.map((r) => r.value).filter(Boolean);
+  }
+  res.json({
+    brands: brandsResult.map((r) => r.brand).filter(Boolean),
+    specs: specsResult
+  });
+});
 router3.get("/products", async (req, res) => {
   const qp = ListProductsQueryParams.safeParse(req.query);
   if (!qp.success) {
     res.status(400).json({ error: qp.error.message });
     return;
   }
-  const { categoryId, search, minPrice, maxPrice, brand, inStock, sortBy, page = 1, limit = 12 } = qp.data;
+  const { categoryId, search, minPrice, maxPrice, brand, inStock, sortBy, page = 1, limit = 12, onSale, yearFrom, yearTo, specFilters } = qp.data;
   const conditions = [];
   if (categoryId) conditions.push(eq(productsTable.categoryId, categoryId));
   if (search) conditions.push(like(productsTable.name, `%${search}%`));
   if (minPrice != null) conditions.push(gte(productsTable.price, minPrice));
   if (maxPrice != null) conditions.push(lte(productsTable.price, maxPrice));
-  if (brand) conditions.push(like(productsTable.brand, `%${brand}%`));
+  if (brand) {
+    const parts = brand.split("|").map((b) => b.trim()).filter(Boolean);
+    if (parts.length === 1) {
+      conditions.push(like(productsTable.brand, `%${parts[0]}%`));
+    } else {
+      conditions.push(or(...parts.map((b) => like(productsTable.brand, `%${b}%`))));
+    }
+  }
   if (inStock != null) conditions.push(eq(productsTable.inStock, inStock));
+  if (onSale) conditions.push(sql`${productsTable.discountPercent} IS NOT NULL AND ${productsTable.discountPercent} > 0`);
+  if (yearFrom) conditions.push(sql`YEAR(${productsTable.createdAt}) >= ${yearFrom}`);
+  if (yearTo) conditions.push(sql`YEAR(${productsTable.createdAt}) <= ${yearTo}`);
+  if (specFilters) {
+    try {
+      const parsed2 = JSON.parse(specFilters);
+      for (const [key, values] of Object.entries(parsed2)) {
+        if (!Array.isArray(values) || values.length === 0) continue;
+        const orClauses = values.map(
+          (v) => sql`JSON_UNQUOTE(JSON_EXTRACT(${productsTable.specs}, CONCAT('$."', ${key}, '"'))) = ${v}`
+        );
+        conditions.push(orClauses.length === 1 ? orClauses[0] : or(...orClauses));
+      }
+    } catch {
+    }
+  }
   const whereClause = conditions.length > 0 ? and(...conditions) : void 0;
   let orderByClause;
   switch (sortBy) {

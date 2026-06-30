@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { eq, and, gte, lte, desc, asc, like, count, sql } from "drizzle-orm";
+import { eq, and, gte, lte, desc, asc, like, count, sql, or } from "drizzle-orm";
 import { db, productsTable, categoriesTable, reviewsTable } from "../db";
 import {
   ListProductsQueryParams,
@@ -72,6 +72,51 @@ router.get("/products/new-arrivals", async (_req, res): Promise<void> => {
   res.json(GetNewArrivalsResponse.parse(withCategory));
 });
 
+router.get("/products/filter-options", async (_req, res): Promise<void> => {
+  const brandsResult = await db
+    .selectDistinct({ brand: productsTable.brand })
+    .from(productsTable)
+    .orderBy(asc(productsTable.brand));
+
+  const specKeys = [
+    "Класс велосипеда",
+    "Тип пользователя",
+    "Вилка (тип)",
+    "Материал рамы",
+    "Тип рамы",
+    "Размер рамы",
+    "Рост велосипедиста",
+    "Тип трансмиссии",
+    "Количество скоростей",
+    "Кассета или трещотка",
+    "Тип манеток",
+    "Диаметр колес",
+    "Передний тормоз",
+    "Задний тормоз",
+    "Материал педалей",
+    "В комплекте",
+  ];
+
+  const specsResult: Record<string, string[]> = {};
+  for (const key of specKeys) {
+    const [rows] = await db.execute(
+      sql`SELECT DISTINCT JSON_UNQUOTE(JSON_EXTRACT(specs, CONCAT('$."', ${key}, '"'))) AS value
+          FROM products
+          WHERE JSON_EXTRACT(specs, CONCAT('$."', ${key}, '"')) IS NOT NULL
+            AND JSON_UNQUOTE(JSON_EXTRACT(specs, CONCAT('$."', ${key}, '"'))) != 'null'
+          ORDER BY value`,
+    );
+    specsResult[key] = (rows as Array<{ value: string }>)
+      .map((r) => r.value)
+      .filter(Boolean);
+  }
+
+  res.json({
+    brands: brandsResult.map((r) => r.brand).filter(Boolean),
+    specs: specsResult,
+  });
+});
+
 router.get("/products", async (req, res): Promise<void> => {
   const qp = ListProductsQueryParams.safeParse(req.query);
   if (!qp.success) {
@@ -79,15 +124,45 @@ router.get("/products", async (req, res): Promise<void> => {
     return;
   }
 
-  const { categoryId, search, minPrice, maxPrice, brand, inStock, sortBy, page = 1, limit = 12 } = qp.data;
+  const { categoryId, search, minPrice, maxPrice, brand, inStock, sortBy, page = 1, limit = 12, onSale, yearFrom, yearTo, specFilters } = qp.data;
 
   const conditions = [];
   if (categoryId) conditions.push(eq(productsTable.categoryId, categoryId));
   if (search) conditions.push(like(productsTable.name, `%${search}%`));
   if (minPrice != null) conditions.push(gte(productsTable.price, minPrice));
   if (maxPrice != null) conditions.push(lte(productsTable.price, maxPrice));
-  if (brand) conditions.push(like(productsTable.brand, `%${brand}%`));
+
+  // Brand: supports pipe-delimited multi-brand OR matching (e.g. "Trek|Giant")
+  if (brand) {
+    const parts = brand.split("|").map((b) => b.trim()).filter(Boolean);
+    if (parts.length === 1) {
+      conditions.push(like(productsTable.brand, `%${parts[0]}%`));
+    } else {
+      conditions.push(or(...parts.map((b) => like(productsTable.brand, `%${b}%`)))!);
+    }
+  }
+
   if (inStock != null) conditions.push(eq(productsTable.inStock, inStock));
+  if (onSale) conditions.push(sql`${productsTable.discountPercent} IS NOT NULL AND ${productsTable.discountPercent} > 0`);
+  if (yearFrom) conditions.push(sql`YEAR(${productsTable.createdAt}) >= ${yearFrom}`);
+  if (yearTo) conditions.push(sql`YEAR(${productsTable.createdAt}) <= ${yearTo}`);
+
+  // Spec filters: JSON-encoded Record<specKey, string[]>
+  if (specFilters) {
+    try {
+      const parsed = JSON.parse(specFilters) as Record<string, string[]>;
+      for (const [key, values] of Object.entries(parsed)) {
+        if (!Array.isArray(values) || values.length === 0) continue;
+        const orClauses = values.map(
+          (v) =>
+            sql`JSON_UNQUOTE(JSON_EXTRACT(${productsTable.specs}, CONCAT('$."', ${key}, '"'))) = ${v}`,
+        );
+        conditions.push(orClauses.length === 1 ? orClauses[0] : or(...orClauses)!);
+      }
+    } catch {
+      // Invalid JSON — ignore
+    }
+  }
 
   const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 

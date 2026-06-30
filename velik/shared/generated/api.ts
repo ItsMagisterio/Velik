@@ -107,7 +107,11 @@ export const ListProductsQueryParams = zod.object({
   "inStock": zod.coerce.boolean().nullish(),
   "sortBy": zod.union([zod.literal('price_asc'),zod.literal('price_desc'),zod.literal('rating'),zod.literal('newest'),zod.literal(null)]).nullish(),
   "page": zod.coerce.number().nullish(),
-  "limit": zod.coerce.number().nullish()
+  "limit": zod.coerce.number().nullish(),
+  "onSale": zod.coerce.boolean().nullish(),
+  "yearFrom": zod.coerce.number().nullish(),
+  "yearTo": zod.coerce.number().nullish(),
+  "specFilters": zod.coerce.string().nullish(),
 })
 
 export const ListProductsResponse = zod.object({

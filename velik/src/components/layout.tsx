@@ -7,11 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect, useRef } from "react";
 import { Input } from "@/components/ui/input";
 
-const BRANDS = [
-  "Greenland", "Aist", "Altair", "Favorit", "Foxx", "Kraken",
-  "Mikado", "Kross", "Nameless", "Nasaland", "Nialanti",
-  "Novatreck", "Racer", "Stels", "Tropix", "Trek", "Cube",
-];
+import { BRANDS } from "@/lib/brands";
 
 export function Layout({ children }: { children: ReactNode }) {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -149,10 +145,10 @@ export function Layout({ children }: { children: ReactNode }) {
             <nav className="flex items-center gap-0">
               {[
                 { href: "/catalog", label: "Каталог" },
-                { href: "/catalog?type=bike", label: "Велосипеды" },
-                { href: "/catalog?type=scooter", label: "Самокаты" },
-                { href: "/catalog?type=ebike", label: "Электротранспорт" },
-                { href: "/catalog?type=accessories", label: "Аксессуары" },
+                { href: "/catalog?slug=velosipedy", label: "Велосипеды" },
+                { href: "/catalog?slug=elektrosamokaty", label: "Самокаты" },
+                { href: "/catalog?slug=elektravelasipedy", label: "Электротранспорт" },
+                { href: "/catalog?slug=aksessuary", label: "Аксессуары" },
                 { href: "/repair", label: "Ремонт велосипедов" },
                 { href: "/promotions", label: "Акции" },
                 { href: "/installment", label: "Рассрочка" },
@@ -299,10 +295,10 @@ export function Layout({ children }: { children: ReactNode }) {
             <div>
               <h3 className="font-medium text-white mb-6">Каталог</h3>
               <ul className="space-y-4">
-                <li><Link href="/catalog?category=ebikes" className="text-muted-foreground hover:text-primary transition-colors">Электровелосипеды</Link></li>
-                <li><Link href="/catalog?category=scooters" className="text-muted-foreground hover:text-primary transition-colors">Электросамокаты</Link></li>
-                <li><Link href="/catalog?category=bikes" className="text-muted-foreground hover:text-primary transition-colors">Велосипеды</Link></li>
-                <li><Link href="/catalog?category=accessories" className="text-muted-foreground hover:text-primary transition-colors">Аксессуары</Link></li>
+                <li><Link href="/catalog?slug=elektravelasipedy" className="text-muted-foreground hover:text-primary transition-colors">Электровелосипеды</Link></li>
+                <li><Link href="/catalog?slug=elektrosamokaty" className="text-muted-foreground hover:text-primary transition-colors">Электросамокаты</Link></li>
+                <li><Link href="/catalog?slug=velosipedy" className="text-muted-foreground hover:text-primary transition-colors">Велосипеды</Link></li>
+                <li><Link href="/catalog?slug=aksessuary" className="text-muted-foreground hover:text-primary transition-colors">Аксессуары</Link></li>
               </ul>
             </div>
             

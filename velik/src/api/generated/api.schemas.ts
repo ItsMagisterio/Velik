@@ -445,6 +445,23 @@ page?: number | null;
  * @nullable
  */
 limit?: number | null;
+/**
+ * @nullable
+ */
+onSale?: boolean | null;
+/**
+ * @nullable
+ */
+yearFrom?: number | null;
+/**
+ * @nullable
+ */
+yearTo?: number | null;
+/**
+ * JSON-encoded spec filters: Record<string, string[]>
+ * @nullable
+ */
+specFilters?: string | null;
 };
 
 export type ListProductsSortBy = typeof ListProductsSortBy[keyof typeof ListProductsSortBy] | null;

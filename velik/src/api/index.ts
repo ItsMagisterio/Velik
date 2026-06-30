@@ -2,3 +2,5 @@ export * from "./generated/api";
 export * from "./generated/api.schemas";
 export { setBaseUrl, setAuthTokenGetter, setSessionIdGetter } from "./custom-fetch";
 export type { AuthTokenGetter } from "./custom-fetch";
+export { useFilterOptions } from "./filter-options";
+export type { FilterOptions } from "./filter-options";
